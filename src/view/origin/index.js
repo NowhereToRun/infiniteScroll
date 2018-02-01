@@ -1,6 +1,10 @@
 import InfiniteScroller from './infinite-scroll'
 import '../../css/index.css'
-import fakeData from './message'
+import {
+  NUM_AVATARS,
+  NUM_IMAGES,
+  MESSAGES
+} from './message'
 import {
   $
 } from '@mfelibs/base-utils'
@@ -78,12 +82,7 @@ ContentSource.prototype = {
         dataType: 'jsonp',
         success: function(data, status) {
           if (data.length == 0) {
-            console.log(0);
-            let localFakeData = JSON.parse(JSON.stringify(fakeData))
-            localFakeData.forEach((item) => {
-              item.id = item.id + (new Date() - 0);
-            })
-            data = localFakeData;
+            return;
           }
           page = page + 1;
           data.forEach((item) => {
@@ -107,8 +106,8 @@ ContentSource.prototype = {
 
     div = div || this.messageTemplate_.cloneNode(true);
     div.dataset.id = item.id;
-    item.pic && (div.querySelector('.news_img > img').src = item.pic);
-    item.sourcepic && (div.querySelector('.news_author_img > img').src = item.sourcepic);
+    div.querySelector('.news_img > img').src = item.pic;
+    div.querySelector('.news_author_img > img').src = item.sourcepic;
     div.querySelector('.news_author_name').textContent = item.source;
     div.querySelector('.news_h1').textContent = item.title;
     div.querySelector('.news_p').textContent = item.intro;
