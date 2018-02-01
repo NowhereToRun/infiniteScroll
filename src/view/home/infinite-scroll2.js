@@ -1,22 +1,3 @@
-/**
- * Copyright 2015 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
-// (function(scope) {
-
 // Number of items to instantiate beyond current view in the scroll direction.
 var RUNWAY_ITEMS = 10;
 
@@ -147,7 +128,8 @@ InfiniteScroller.prototype = {
     this.anchorScrollTop = this.scroller_.scrollTop;
     var lastScreenItem = this.calculateAnchoredItem(this.anchorItem, this.scroller_.offsetHeight);
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
-    console.log(this.anchorItem.index, lastScreenItem.index);
+    this.showCB(this.anchorItem.index, lastScreenItem.index);
+
     if (delta < 0) // 向上滚动 ⬆︎
       this.fill(this.anchorItem.index - RUNWAY_ITEMS, lastScreenItem.index + RUNWAY_ITEMS_OPPOSITE);
     else // 初始化 或者向下滚动(向底部) ⬇︎
@@ -203,6 +185,20 @@ InfiniteScroller.prototype = {
   },
 
   /**
+   * 可视后回调
+   */
+  showCB: function(start, end) {
+    for (var i = start; i < end; i++) {
+      if (this.items_[i] && this.items_[i].data) {
+        if (typeof this.items_[i].data.fn === 'function' && !this.items_[i].data.isFnTriggered) {
+          this.items_[i].data.fn();
+          this.items_[i].data.isFnTriggered = 1;
+        }
+      }
+    }
+  },
+
+  /**
    * Creates or returns an existing tombstone ready to be reused.
    * @return {Element} A tombstone element ready to be used.
    */
@@ -227,22 +223,33 @@ InfiniteScroller.prototype = {
     // TODO: Limit this based on the change in visible items rather than looping
     // over all items.
     var i;
-    var unusedNodes = [];
+    // var unusedNodes = [];
+    var unusedNodesObj = {};
     // console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
 
     for (i = 0; i < this.items_.length; i++) {
       // Skip the items which should be visible.
       if (i == this.firstAttachedItem_) {
-        i = this.lastAttachedItem_ - 1;
+        i = this.lasg289tAttachedItem_ - 1;
         continue;
       }
+      // console.log(this.items_[i])
       if (this.items_[i].node) {
         if (this.items_[i].node.classList.contains('tombstone')) {
           // console.log('tombstone',i,this.items_[i].node);
           this.tombstones_.push(this.items_[i].node);
           this.tombstones_[this.tombstones_.length - 1].classList.add('invisible');
         } else {
-          unusedNodes.push(this.items_[i].node);
+          // unusedNodes.push(this.items_[i].node);
+
+          // add 根据模板类型回收
+          var moduleType = this.items_[i].data.randomModule;
+          if (Object.prototype.toString.call(unusedNodesObj[moduleType]) === '[object Array]') {
+            unusedNodesObj[moduleType].push(this.items_[i].node);
+          } else {
+            unusedNodesObj[moduleType] = [this.items_[i].node];
+          }
+
         }
       }
       this.items_[i].node = null;
@@ -269,7 +276,15 @@ InfiniteScroller.prototype = {
           continue;
         }
       }
-      var node = this.items_[i].data ? this.source_.render(this.items_[i].data, unusedNodes.pop()) : this.getTombstone();
+      // var node = this.items_[i].data ? this.source_.render(this.items_[i].data, unusedNodes.pop()) : this.getTombstone();
+      var dom = null;
+      var templateType = this.items_[i].data && this.items_[i].data.randomModule;
+      if (unusedNodesObj[templateType] && unusedNodesObj[templateType].length) {
+        console.log('可复用');
+        dom = unusedNodesObj[templateType].pop();
+      }
+
+      var node = this.items_[i].data ? this.source_.render(this.items_[i].data, dom) : this.getTombstone();
       // Maybe don't do this if it's already attached?
       node.style.position = 'absolute';
       this.items_[i].top = -1;
@@ -278,10 +293,16 @@ InfiniteScroller.prototype = {
     }
     // debugger
     // Remove all unused nodes
-    while (unusedNodes.length) {
-      this.scroller_.removeChild(unusedNodes.pop());
+    // console.log(unusedNodes);
+    // while (unusedNodes.length) {
+    //   this.scroller_.removeChild(unusedNodes.pop());
+    // }
+    for (var i in unusedNodesObj) {
+      while (unusedNodesObj[i].length) {
+        this.scroller_.removeChild(unusedNodesObj[i].pop());
+      }
     }
-
+    unusedNodesObj = null;
     // Get the height of all nodes which haven't been measured yet.
     for (i = this.firstAttachedItem_; i < this.lastAttachedItem_; i++) {
       // Only cache the height if we have the real contents, not a placeholder.

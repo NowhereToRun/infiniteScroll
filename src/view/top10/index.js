@@ -4,6 +4,7 @@ import fakeData from './message'
 import {
   $
 } from '@mfelibs/base-utils'
+import Stats from './stats.min.js'
 
 var INIT_TIME = new Date().getTime();
 var page = 1;
@@ -82,6 +83,7 @@ ContentSource.prototype = {
             let localFakeData = JSON.parse(JSON.stringify(fakeData))
             localFakeData.forEach((item) => {
               item.id = item.id + (new Date() - 0);
+              item.title = parseInt(Math.random()*10) + ', ' + item.title;
             })
             data = localFakeData;
           }
@@ -149,20 +151,20 @@ document.addEventListener('DOMContentLoaded', function() {
       new ContentSource()
     );
 
-  //   var stats = new Stats();
-  //   var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
-  //   stats.addPanel(domPanel);
-  //   stats.showPanel(3);
-  //   document.body.appendChild(stats.dom);
-  //   var TIMEOUT = 100;
-  //   setTimeout(function timeoutFunc() {
-  //     // Only update DOM node graph when we have time to spare to call
-  //     // numDomNodes(), which is a fairly expensive function.
-  //     requestIdleCallback(function() {
-  //       domPanel.update(numDomNodes(document.body), 1500);
-  //       setTimeout(timeoutFunc, TIMEOUT);
-  //     });
-  //   }, TIMEOUT);
+    var stats = new Stats();
+    var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
+    stats.addPanel(domPanel);
+    stats.showPanel(3);
+    document.body.appendChild(stats.dom);
+    var TIMEOUT = 100;
+    setTimeout(function timeoutFunc() {
+      // Only update DOM node graph when we have time to spare to call
+      // numDomNodes(), which is a fairly expensive function.
+      requestIdleCallback(function() {
+        domPanel.update(numDomNodes(document.body), 1500);
+        setTimeout(timeoutFunc, TIMEOUT);
+      });
+    }, TIMEOUT);
 
 
 });

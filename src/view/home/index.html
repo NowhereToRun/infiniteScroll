@@ -25,9 +25,8 @@ limitations under the License.
   <meta name="author" content="Paul Lewis" />
   <meta name="viewport" content="width=device-width">
   <title>Infinite Scroll</title>
-  <!-- <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'> -->
-  <link rel="stylesheet" href="https://mjs.sinaimg.cn/wap/online/cms/channel/hot-news/css/main_all.min.css">
-
+  <link rel="stylesheet" href="https://mjs.sinaimg.cn/wap/project/homev8/8.2.83/homev8/homev8.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <script>
     ! function(w, d, m) {
       function r() {
@@ -45,22 +44,38 @@ limitations under the License.
     }(window, document, Math);
   </script>
   <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
-      overflow: hidden;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    }
-
     #templates {
       display: none;
     }
 
     .news_list_row {
       width: 100%;
+      background: rgb(248, 248, 248);
+    }
+
+    section.outer {
+      position: absolute;
+      width: 100%;
+      background-color: rgb(248, 248, 248);
+    }
+
+    .ls_f {
+      position: absolute;
+      width: 100%;
+      margin: 0;
+      padding: .22rem .2rem;
+      background: rgb(248, 248, 248);
+    }
+    .ls_f_b{
+      padding-left: 2.4rem;
+    }
+    .ls_f_e_l{
+      left: 2.4rem;
+    }
+    .m_video_box{
+      width: 100%;
+      margin: 0;
+      padding: 0 .2rem .2rem
     }
   </style>
   <!-- <link rel="stylesheet" href="../../css/index.css"> -->
@@ -68,81 +83,43 @@ limitations under the License.
 
 <body>
   <div id="templates">
-    <!-- <a class="ls_f j_tombstone" data-id="{{id}}">
+    <a class="ls_f j_tombstone tombstone" data-id="{{id}}">
         <b class="ls_f_b">
-            <em class="ls_f_e ls_f_e_l"></em>
+          <em class="ls_f_e ls_f_e_l"></em>
         </b>
-    </a> -->
-    <a href="" class="news_list_row j_msg" data-id="{{id}}">
-      <figure class="news_img">
-        <img src="" alt="">
-        <figcaption class="news_info">
-          <blockquote class="news_author_info">
-            <span class="news_author_name"></span>
-            <span class="news_author_img">
-                <img src="" alt="">
-              </span>
-          </blockquote>
-        </figcaption>
-      </figure>
-      <aside class="news_content">
-        <h1 class="news_h1"></h1>
-        <p class="news_p"></p>
-      </aside>
-    </a>
-    <a href="" class="news_list_row tombstone j_template" data-id="{{id}}">
-        <figure class="news_img">
-          <img src="" alt="">
-          <figcaption class="news_info">
-            <blockquote class="news_author_info">
-              <span class="news_author_name"></span>
-              <span class="news_author_img">
-                  <img src="" alt="">
-                </span>
-            </blockquote>
-          </figcaption>
-        </figure>
-        <aside class="news_content">
-          <h1 class="news_h1"></h1>
-          <p class="news_p"></p>
-        </aside>
       </a>
-    <li class="chat-item" data-id="{{id}}">
-      <img class="avatar" width="48" height="48">
-      <div class="bubble">
-        <p></p>
-        <img width="300" height="300">
-        <div class="meta">
-          <time class="posted-date"></time>
-        </div>
-      </div>
-    </li>
-    <li class="chat-item tombstone" data-id="{{id}}">
-      <img class="avatar" width="48" height="48" src="../../img/unknown.jpg">
-      <div class="bubble">
-        <p></p>
-        <p></p>
-        <p></p>
-        <div class="meta">
-          <time class="posted-date"></time>
-        </div>
-      </div>
-    </li>
-    <!-- <a class="j_template" href="" title="" data-id="{{id}}">
+    <a class="news_list_row j_msg_2" href="" title="" data-id="{{id}}">
       <section class="m_f_a">
         <figure class="m_f_div i_bg">
           <img class="img_width finpic" src="" alt="">
         </figure>
         <aside class="m_f_con">
-          <h2 class="m_f_con_t cm_tit">汪小菲偷发老婆未修照，41岁大S颜值变化大，网友：有本事别删！</h2>
+          <h2 class="m_f_con_t cm_tit"></h2>
           <blockquote class="cm_f_ic cm_f_ic_l">
-            <em class="m_f_con_n m_f_con_n_r"><span class="m_f_con_ic_l m_f_con_ic icon_com"></span><span class="m_f_con_com_n">58</span></em><cite class="m_f_con_add">流凨柔软思恋</cite>
+            <em class="m_f_con_n m_f_con_n_r">
+              <span class="m_f_con_ic_l m_f_con_ic icon_com"></span>
+              <span class="m_f_con_com_n"></span>
+            </em>
+            <cite class="m_f_con_add"></cite>
           </blockquote>
         </aside>
       </section>
-    </a> -->
+    </a>
+    <a class="m_video_box show j_msg" href="JavaScript:void(0)" title="请后端同学务必填写标题" style="position:absolute;">
+        <figure class="m_video_img_box">
+          <aside class="m_video_img_bg">
+            <img class="m_video_img_bg_img" src="https://z1.sinaimg.cn/auto/resize?img=http://qncdn.miaopai.com/stream/00Im2J78YmRz~-N0DLboJ9~DeLYHH65H_1494899978.jpg&amp;size=710_400">
+          </aside>
+          <blockquote class="m_video_info "><span>935次播放</span><span class="fr">382KB</span><span class="m_video_info_line"></span>
+            <time class="fr">05:38</time>
+          </blockquote>
+          <span class="cm_btn_paly icon_s_video cm_c_c"></span>
+        </figure>
+        <h2 class="m_video_tit cm_tit">跟着《爱乐之城》寻找洛杉矶10大浪漫地标跟着《爱乐之城》寻找洛杉矶10大浪漫地标</h2>
+      </a>
   </div>
   <ul id="chat-timeline" class="page_main" style="background:#f8f8f8">
+
 
   </ul>
   <!-- <script src="es6-promise.js"></script> -->
