@@ -1,0 +1,27 @@
+{
+  "name": "base-component-infiniteScroll",
+  "version": "0.1.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "dev": "node ./node_modules/webpack-marauder/build/dev-server.js",
+    "build": "node ./node_modules/webpack-marauder/build/build.js",
+    "dll": "node ./node_modules/webpack-marauder/build/dll.js"
+  },
+  "dependencies": {
+    "@mfelibs/base-utils": "^1.5.3",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
+    "vue": "^2.5.3"
+  },
+  "devDependencies": {
+    "webpack-marauder": "^1.6.2"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "license": "MIT",
+  "author": "fengzihao <zihao5@staff.sina.com.cn>",
+  "repository": ""
+}
