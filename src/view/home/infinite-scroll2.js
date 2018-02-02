@@ -422,6 +422,5 @@ InfiniteScroller.prototype = {
     this.attachContent();
   }
 }
-//   })(self);
 
 export default InfiniteScroller

@@ -150,7 +150,7 @@ ContentSource.prototype = {
       case 'type2':
         divObj = renderType2(item, divObj);
         break;
-      case 'type':
+      case 'type3':
       default:
         divObj = renderType2(item, divObj);
     }
