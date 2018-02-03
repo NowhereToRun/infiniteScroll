@@ -5,44 +5,13 @@ import {
   $
 } from '@mfelibs/base-utils'
 import Stats from './stats.min.js'
+import tools from './tools'
+var statusPanel  = new tools();
+var totalNum = 0;
+
 
 var INIT_TIME = new Date().getTime();
 var page = 1;
-/**
- * Constructs a random item with a given id.
- * @param {number} id An identifier for the item.
- * @return {Object} A randomly generated item.
- */
-function getItem(id) {
-  function pickRandom(a) {
-    return a[Math.floor(Math.random() * a.length)];
-  }
-
-  return new Promise(function(resolve) {
-    var item = {
-      id: id,
-      avatar: Math.floor(Math.random() * NUM_AVATARS),
-      self: Math.random() < 0.1,
-      image: Math.random() < 1.0 / 20 ? Math.floor(Math.random() * NUM_IMAGES) : '',
-      time: new Date(Math.floor(INIT_TIME + id * 20 * 1000 + Math.random() * 20 * 1000)),
-      message: pickRandom(MESSAGES)
-    }
-    if (item.image == '') {
-      resolve(item);
-    } else {
-      var image = new Image();
-      image.src = 'images/image' + item.image + '.jpg';
-      image.addEventListener('load', function() {
-        item.image = image;
-        resolve(item);
-      });
-      image.addEventListener('error', function() {
-        item.image = '';
-        resolve(item);
-      });
-    }
-  });
-}
 
 function ContentSource() {
   // Collect template nodes to be cloned when needed.
@@ -83,7 +52,7 @@ ContentSource.prototype = {
             let localFakeData = JSON.parse(JSON.stringify(fakeData))
             localFakeData.forEach((item) => {
               item.id = item.id + (new Date() - 0);
-              item.title = parseInt(Math.random()*10) + ', ' + item.title;
+              item.title = parseInt(Math.random() * 10) + ', ' + item.title;
             })
             data = localFakeData;
           }
@@ -93,6 +62,8 @@ ContentSource.prototype = {
               console.log(item.id);
             }
           })
+          totalNum = totalNum + data.length;
+          statusPanel.addItem('Total_data_number', totalNum);
           resolve(data);
         }
       })
@@ -151,21 +122,28 @@ document.addEventListener('DOMContentLoaded', function() {
       new ContentSource()
     );
 
-    var stats = new Stats();
-    var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
-    stats.addPanel(domPanel);
-    stats.showPanel(3);
-    $(domPanel.dom).show(); // ios手机上不显示、临时处理
-    document.body.appendChild(stats.dom);
-    var TIMEOUT = 100;
-    setTimeout(function timeoutFunc() {
-      // Only update DOM node graph when we have time to spare to call
-      // numDomNodes(), which is a fairly expensive function.
+  var stats = new Stats();
+  var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
+  stats.addPanel(domPanel);
+  stats.showPanel(3);
+  $(domPanel.dom).show(); // ios手机上不显示、临时处理
+  document.body.appendChild(stats.dom);
+  var TIMEOUT = 100;
+  setTimeout(function timeoutFunc() {
+    // Only update DOM node graph when we have time to spare to call
+    // numDomNodes(), which is a fairly expensive function.
+    window.requestIdleCallback ?
       requestIdleCallback(function() {
         domPanel.update(numDomNodes(document.body), 1500);
         setTimeout(timeoutFunc, TIMEOUT);
-      });
-    }, TIMEOUT);
+      }) :
+      setInterval(function() {
+        domPanel.update(numDomNodes(document.body), 1500)
+      }, 500)
+  }, TIMEOUT);
 
 
 });
+
+
+

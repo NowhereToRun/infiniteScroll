@@ -6,44 +6,13 @@ import Stats from './stats.js'
 import {
   $
 } from '@mfelibs/base-utils'
+import tools from './tools'
+var statusPanel  = new tools();
+var totalNum = 0;
+
 
 var INIT_TIME = new Date().getTime();
 var page = 1;
-/**
- * Constructs a random item with a given id.
- * @param {number} id An identifier for the item.
- * @return {Object} A randomly generated item.
- */
-function getItem(id) {
-  function pickRandom(a) {
-    return a[Math.floor(Math.random() * a.length)];
-  }
-
-  return new Promise(function(resolve) {
-    var item = {
-      id: id,
-      avatar: Math.floor(Math.random() * NUM_AVATARS),
-      self: Math.random() < 0.1,
-      image: Math.random() < 1.0 / 20 ? Math.floor(Math.random() * NUM_IMAGES) : '',
-      time: new Date(Math.floor(INIT_TIME + id * 20 * 1000 + Math.random() * 20 * 1000)),
-      message: pickRandom(MESSAGES)
-    }
-    if (item.image == '') {
-      resolve(item);
-    } else {
-      var image = new Image();
-      image.src = 'images/image' + item.image + '.jpg';
-      image.addEventListener('load', function() {
-        item.image = image;
-        resolve(item);
-      });
-      image.addEventListener('error', function() {
-        item.image = '';
-        resolve(item);
-      });
-    }
-  });
-}
 
 function ContentSource() {
   // Collect template nodes to be cloned when needed.
@@ -99,6 +68,8 @@ ContentSource.prototype = {
                 item.randomModule = 'type3'
               }
             })
+            totalNum = totalNum + data.length;
+            statusPanel.addItem('Total_data_number', totalNum);
             resolve(data);
           }
         })
@@ -122,6 +93,8 @@ ContentSource.prototype = {
           }
         })
         setTimeout(function() {
+          totalNum = totalNum + localFakeData.length;
+          statusPanel.addItem('Total_data_number', totalNum);
           resolve(localFakeData);
         }, 500);
       }

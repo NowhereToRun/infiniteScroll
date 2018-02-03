@@ -18,8 +18,6 @@ var Stats = function () {
 	//
 
 	function addPanel( panel ) {
-		console.log(container);
-		console.log(panel.dom);
 		container.appendChild( panel.dom );
 
 		return panel;

@@ -430,116 +430,6 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
-// CONCATENATED MODULE: ./src/view/top10/infinite-scroll.js
-// Number of items to instantiate beyond current view in the scroll direction.
-var RUNWAY_ITEMS=10;// Number of items to instantiate beyond current view in the opposite direction.
-var RUNWAY_ITEMS_OPPOSITE=10;// The number of pixels of additional length to allow scrolling to.
-var SCROLL_RUNWAY=2000;// The animation interval (in ms) for fading in content from tombstones.
-var ANIMATION_DURATION_MS=200;var InfiniteScrollerSource=function InfiniteScrollerSource(){};InfiniteScrollerSource.prototype={/**
-   * Fetch more items from the data source. This should try to fetch at least
-   * count items but may fetch more as desired. Subsequent calls to fetch should
-   * fetch items following the last successful fetch.
-   * @param {number} count The minimum number of items to fetch for display.
-   * @return {Promise(Array<Object>)} Returns a promise which will be resolved
-   *     with an array of items.
-   */fetch:function fetch(count){},/**
-   * Create a tombstone element. All tombstone elements should be identical
-   * @return {Element} A tombstone element to be displayed when item data is not
-   *     yet available for the scrolled position.
-   */createTombstone:function createTombstone(){},/**
-   * Render an item, re-using the provided item div if passed in.
-   * @param {Object} item The item description from the array returned by fetch.
-   * @param {?Element} element If provided, this is a previously displayed
-   *     element which should be recycled for the new item to display.
-   * @return {Element} The constructed element to be displayed in the scroller.
-   */render:function render(item,div){}};/**
- * Construct an infinite scroller.
- * @param {Element} scroller The scrollable element to use as the infinite
- *     scroll region.
- * @param {InfiniteScrollerSource} source A provider of the content to be
- *     displayed in the infinite scroll region.
- */var InfiniteScroller=function InfiniteScroller(scroller,source){this.anchorItem={index:0,offset:0};this.firstAttachedItem_=0;this.lastAttachedItem_=0;this.anchorScrollTop=0;this.tombstoneSize_=0;this.tombstoneWidth_=0;this.tombstones_=[];this.scroller_=scroller;this.source_=source;this.items_=[];this.loadedItems_=0;this.requestInProgress_=false;this.scroller_.addEventListener('scroll',this.onScroll_.bind(this));window.addEventListener('resize',this.onResize_.bind(this));// Create an element to force the scroller to allow scrolling to a certain
-// point.
-this.scrollRunway_=document.createElement('div');// Internet explorer seems to require some text in this div in order to
-// ensure that it can be scrolled to.
-this.scrollRunway_.textContent=' ';this.scrollRunwayEnd_=0;this.scrollRunway_.style.position='absolute';this.scrollRunway_.style.height='1px';this.scrollRunway_.style.width='1px';this.scrollRunway_.style.transition='transform 0.2s';this.scroller_.appendChild(this.scrollRunway_);this.onResize_();};InfiniteScroller.prototype={/**
-   * Called when the browser window resizes to adapt to new scroller bounds and
-   * layout sizes of items within the scroller.
-   */onResize_:function onResize_(){// TODO: If we already have tombstones attached to the document, it would
-// probably be more efficient to use one of them rather than create a new
-// one to measure.
-var tombstone=this.source_.createTombstone();tombstone.style.position='absolute';this.scroller_.appendChild(tombstone);tombstone.classList.remove('invisible');this.tombstoneSize_=tombstone.offsetHeight;this.tombstoneWidth_=tombstone.offsetWidth;this.scroller_.removeChild(tombstone);// Reset the cached size of items in the scroller as they may no longer be
-// correct after the item content undergoes layout.
-for(var i=0;i<this.items_.length;i++){this.items_[i].height=this.items_[i].width=0;}this.onScroll_();},/**
-   * Called when the scroller scrolls. This determines the newly anchored item
-   * and offset and then updates the visible elements, requesting more items
-   * from the source if we've scrolled past the end of the currently available
-   * content.
-   */onScroll_:function onScroll_(){var delta=this.scroller_.scrollTop-this.anchorScrollTop;// Special case, if we get to very top, always scroll to top.
-if(this.scroller_.scrollTop==0){this.anchorItem={index:0,offset:0};}else{this.anchorItem=this.calculateAnchoredItem(this.anchorItem,delta);}this.anchorScrollTop=this.scroller_.scrollTop;var lastScreenItem=this.calculateAnchoredItem(this.anchorItem,this.scroller_.offsetHeight);// console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
-this.showCB(this.anchorItem.index,lastScreenItem.index);console.log(this.anchorItem.index,lastScreenItem.index,delta);if(delta<0)// 向上滚动 ⬆︎
-this.fill(this.anchorItem.index-RUNWAY_ITEMS,lastScreenItem.index+RUNWAY_ITEMS_OPPOSITE);else// 初始化 或者向下滚动(向底部) ⬇︎
-this.fill(this.anchorItem.index-RUNWAY_ITEMS_OPPOSITE,lastScreenItem.index+RUNWAY_ITEMS);},/**
-   * Calculates the item that should be anchored after scrolling by delta from
-   * the initial anchored item.
-   * @param {{index: number, offset: number}} initialAnchor The initial position
-   *     to scroll from before calculating the new anchor position.
-   * @param {number} delta The offset from the initial item to scroll by.
-   * @return {{index: number, offset: number}} Returns the new item and offset
-   *     scroll should be anchored to.
-   */calculateAnchoredItem:function calculateAnchoredItem(initialAnchor,delta){if(delta==0)return initialAnchor;delta+=initialAnchor.offset;var i=initialAnchor.index;var tombstones=0;if(delta<0){while(delta<0&&i>0&&this.items_[i-1].height){delta+=this.items_[i-1].height;i--;}tombstones=Math.max(-i,Math.ceil(Math.min(delta,0)/this.tombstoneSize_));}else{while(delta>0&&i<this.items_.length&&this.items_[i].height&&this.items_[i].height<delta){delta-=this.items_[i].height;i++;}if(i>=this.items_.length||!this.items_[i].height)tombstones=Math.floor(Math.max(delta,0)/this.tombstoneSize_);}i+=tombstones;delta-=tombstones*this.tombstoneSize_;return{index:i,offset:delta};},/**
-   * Sets the range of items which should be attached and attaches those items.
-   * @param {number} start The first item which should be attached.
-   * @param {number} end One past the last item which should be attached.
-   */fill:function fill(start,end){this.firstAttachedItem_=Math.max(0,start);this.lastAttachedItem_=end;this.attachContent();},/**
-   * 可视后回调
-   */showCB:function showCB(start,end){for(var i=start;i<end;i++){if(this.items_[i]&&this.items_[i].data){if(typeof this.items_[i].data.fn==='function'&&!this.items_[i].data.isFnTriggered){this.items_[i].data.fn();this.items_[i].data.isFnTriggered=1;}}}},/**
-   * Creates or returns an existing tombstone ready to be reused.
-   * @return {Element} A tombstone element ready to be used.
-   */getTombstone:function getTombstone(){var tombstone=this.tombstones_.pop();if(tombstone){tombstone.classList.remove('invisible');tombstone.style.opacity=1;tombstone.style.transform='';tombstone.style.transition='';return tombstone;}return this.source_.createTombstone();},/**
-   * Attaches content to the scroller and updates the scroll position if
-   * necessary.
-   */attachContent:function attachContent(){// Collect nodes which will no longer be rendered for reuse.
-// TODO: Limit this based on the change in visible items rather than looping
-// over all items.
-var i;var unusedNodes=[];// console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
-for(i=0;i<this.items_.length;i++){// Skip the items which should be visible.
-if(i==this.firstAttachedItem_){i=this.lastAttachedItem_-1;continue;}if(this.items_[i].node){if(this.items_[i].node.classList.contains('tombstone')){// console.log('tombstone',i,this.items_[i].node);
-this.tombstones_.push(this.items_[i].node);this.tombstones_[this.tombstones_.length-1].classList.add('invisible');}else{unusedNodes.push(this.items_[i].node);}}this.items_[i].node=null;}var tombstoneAnimations={};// Create DOM nodes.
-for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){while(this.items_.length<=i){this.addItem_();}if(this.items_[i].node){// if it's a tombstone but we have data, replace it.
-if(this.items_[i].node.classList.contains('tombstone')&&this.items_[i].data){// TODO: Probably best to move items on top of tombstones and fade them in instead.
-if(ANIMATION_DURATION_MS){this.items_[i].node.style.zIndex=1;tombstoneAnimations[i]=[this.items_[i].node,this.items_[i].top-this.anchorScrollTop];}else{this.items_[i].node.classList.add('invisible');this.tombstones_.push(this.items_[i].node);}this.items_[i].node=null;}else{continue;}}var node=this.items_[i].data?this.source_.render(this.items_[i].data,unusedNodes.pop()):this.getTombstone();// Maybe don't do this if it's already attached?
-node.style.position='absolute';this.items_[i].top=-1;this.scroller_.appendChild(node);this.items_[i].node=node;}// debugger
-// Remove all unused nodes
-while(unusedNodes.length){this.scroller_.removeChild(unusedNodes.pop());}// Get the height of all nodes which haven't been measured yet.
-for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){// Only cache the height if we have the real contents, not a placeholder.
-if(this.items_[i].data&&!this.items_[i].height){this.items_[i].height=this.items_[i].node.offsetHeight;this.items_[i].width=this.items_[i].node.offsetWidth;}}// Fix scroll position in case we have realized the heights of elements
-// that we didn't used to know.
-// TODO: We should only need to do this when a height of an item becomes
-// known above.
-this.anchorScrollTop=0;for(i=0;i<this.anchorItem.index;i++){this.anchorScrollTop+=this.items_[i].height||this.tombstoneSize_;}this.anchorScrollTop+=this.anchorItem.offset;// Position all nodes.
-var curPos=this.anchorScrollTop-this.anchorItem.offset;i=this.anchorItem.index;while(i>this.firstAttachedItem_){curPos-=this.items_[i-1].height||this.tombstoneSize_;i--;}while(i<this.firstAttachedItem_){curPos+=this.items_[i].height||this.tombstoneSize_;i++;}// Set up initial positions for animations.
-for(var i in tombstoneAnimations){var anim=tombstoneAnimations[i];this.items_[i].node.style.transform='translateY('+(this.anchorScrollTop+anim[1])+'px) scale('+this.tombstoneWidth_/this.items_[i].width+', '+this.tombstoneSize_/this.items_[i].height+')';// Call offsetTop on the nodes to be animated to force them to apply current transforms.
-this.items_[i].node.offsetTop;anim[0].offsetTop;this.items_[i].node.style.transition='transform '+ANIMATION_DURATION_MS+'ms';}for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){var anim=tombstoneAnimations[i];if(anim){anim[0].style.transition='transform '+ANIMATION_DURATION_MS+'ms, opacity '+ANIMATION_DURATION_MS+'ms';anim[0].style.transform='translateY('+curPos+'px) scale('+this.items_[i].width/this.tombstoneWidth_+', '+this.items_[i].height/this.tombstoneSize_+')';anim[0].style.opacity=0;}if(curPos!=this.items_[i].top){if(!anim)this.items_[i].node.style.transition='';this.items_[i].node.style.transform='translateY('+curPos+'px)';}this.items_[i].top=curPos;curPos+=this.items_[i].height||this.tombstoneSize_;}this.scrollRunwayEnd_=Math.max(this.scrollRunwayEnd_,curPos+SCROLL_RUNWAY);this.scrollRunway_.style.transform='translate(0, '+this.scrollRunwayEnd_+'px)';this.scroller_.scrollTop=this.anchorScrollTop;if(ANIMATION_DURATION_MS){// TODO: Should probably use transition end, but there are a lot of animations we could be listening to.
-setTimeout(function(){for(var i in tombstoneAnimations){var anim=tombstoneAnimations[i];anim[0].classList.add('invisible');this.tombstones_.push(anim[0]);// Tombstone can be recycled now.
-}}.bind(this),ANIMATION_DURATION_MS);}this.maybeRequestContent();},/**
-   * Requests additional content if we don't have enough currently.
-   */maybeRequestContent:function maybeRequestContent(){// Don't issue another request if one is already in progress as we don't
-// know where to start the next request yet.
-if(this.requestInProgress_)return;var itemsNeeded=this.lastAttachedItem_-this.loadedItems_;if(itemsNeeded<=0)return;this.requestInProgress_=true;this.source_.fetch(itemsNeeded).then(this.addContent.bind(this));},/**
-   * Adds an item to the items list.
-   */addItem_:function addItem_(){this.items_.push({'data':null,'node':null,'height':0,'width':0,'top':0});},/**
-   * Adds the given array of items to the items list and then calls
-   * attachContent to update the displayed content.
-   * @param {Array<Object>} items The array of items to be added to the infinite
-   *     scroller list.
-   */addContent:function addContent(items){this.requestInProgress_=false;for(var i=0;i<items.length;i++){if(this.items_.length<=this.loadedItems_)this.addItem_();this.items_[this.loadedItems_++].data=items[i];}this.attachContent();}};/* harmony default export */ var infinite_scroll = (InfiniteScroller);
-// EXTERNAL MODULE: ./src/css/index.css
-var css = __webpack_require__(5);
-var css_default = /*#__PURE__*/__webpack_require__.n(css);
-
-// CONCATENATED MODULE: ./src/view/top10/message.js
-var defaultData=[{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5580875.d.html",id:"fyrcsrw5580875",title:"吴恩达：天下武功唯快不破，我的成功可以复制",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/pCXT-fyrcsrw5578386.jpg",intro:"去年夏天就被曝光的AI Fund，吴恩达愣是憋到如今才开口承认。",source:"量子位",authorID:"6105753431",cTime:1517472692,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.200.200.50/006Fd7o3jw8fbw134ijknj305k05k3ye.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8220508.d.html",id:"fyreyvz8220508",title:"看不懂《恋与制作人》，是因为你没有少女心",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/RZu6-fyrcsrw5543327.jpg",intro:"少女心不是无知、幼稚、傻白甜，而是尝遍了世间冷暖，仍然愿意去相信一个美丽的梦境。",source:"触乐网",authorID:"3957040489",cTime:1517472260,sourcepic:"https://tva1.sinaimg.cn/crop.0.0.299.299.50/ebdba569jw1et5xb12eydj208c08c74n.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5504586.d.html",id:"fyrcsrw5504586",title:"砍单近半，iPhoneX为何开始不受欢迎了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/kw78-fyrcsrw5503259.jpg",intro:"从今天的智能手机市场来看，过去一年智能手机首次呈现负增长，但这并不是最坏的时刻。",source:"王新喜",authorID:"1888089111",cTime:1517471716,sourcepic:"https://tva2.sinaimg.cn/crop.53.0.586.586.50/7089f417jw8fbmicm71pmj20hs0hswex.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8199090.d.html",id:"fyreyvz8199090",title:"百头大战背后的信息流江湖",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/wEyE-fyrcsrw5259061.jpg",intro:"一个标题+三幅图片+精准内容，足够将碎片化的时间偷走。",source:"刘兴亮",authorID:"1455643221",cTime:1517468755,sourcepic:"https://z4.sinaimg.cn/auto/resize?img=http://tvax1.sinaimg.cn/crop.0.0.996.996.50/56c35a55ly8ffc5ly69j5j20ro0rowg1.jpg&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5176159.d.html",id:"fyrcsrw5176159",title:"程浩:互联网下半场三大关键词",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/uSka-fyrcsrw5164585.jpg",intro:"我认为人口和流量红利消失，是中国互联网上半场跟下半场的分水岭。",source:"程浩",authorID:"5676714248",cTime:1517467837,sourcepic:"https://tva3.sinaimg.cn/crop.73.5.1888.1888.50/006caUHejw8evlryuun8kj31kw1ii7wh.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8190245.d.html",id:"fyreyvz8190245",title:"SNH48前成员亲述：站队、抑郁、撕逼 因陪酒饭局退团",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/57yN-fyrcsrw5106599.jpg",intro:"她面向窗台，背对着我，我轻轻按下拍摄键。只是不知道，此刻她看到的远方，是否还残存着曾经耀眼的梦想。",source:"娱乐资本论",authorID:"5159017394",cTime:1517467117,sourcepic:"https://www.sinaimg.cn/dy/zl/author/yulezibenlun/idx/2014/0611/U6161P1T935D150F24102DT20140611091132.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw4135418.d.html",id:"fyrcsrw4135418",title:"我为什么不看好众筹民宿",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/c6fY-fyrcsrw4133271.jpg",intro:"单从投资角度看，普通投资者投资民宿众筹项目，最看重的因素是——较高的收益率。而民宿项目收益率吸引潜在投资者的原因一般有两个：真实、旅游行业景气度。",source:"苏宁金融研究院",authorID:"3819351799",cTime:1517454570,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8117622.d.html",id:"fyreyvz8117622",title:"#创事记年度作者#榜单公布",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/LvkS-fyrcsrw3861644.jpg",intro:"新闻事件如同水面上的浮冰，伴随着时间的流逝，轰然向前。但我们相信，记录与评论的意义不会随着事件的平息而消逝。",source:"创事记",authorID:"2907917243",cTime:1517451938,sourcepic:"https://z4.sinaimg.cn/auto/resize?img=http://tvax1.sinaimg.cn/crop.17.0.345.345.50/ad534bbbly1fhicpq3no8g20ak09lt9o.gif&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8108476.d.html",id:"fyreyvz8108476",title:"古天乐的“贪玩”直播，最后变成了300万人暗中观察",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/rkQY-fyrcsrw3749951.jpg",intro:"然而，这场直播却在观众的一片骂声中结束。",source:"ACGx",authorID:"5705024508",cTime:1517450344,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.500.500.50/006e5Hukjw8eyde3ekpbvj30dw0dwmx7.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8090253.d.html",id:"fyreyvz8090253",title:"无人驾驶挺火，隔壁的机器蛇怎么样了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/EQUS-fyrcsrw3479059.jpg",intro:"说不定某一天，我们会在街上随处可见机器蛇来完成各种工作。到那时候，不知道怕蛇的孩子们会有什么感想……",source:"脑极体",authorID:"6336727143",cTime:1517446082,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw3454014.d.html",id:"fyrcsrw3454014",title:"有多少中产已经陷入“中等收入陷阱”？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/Zgxv-fyrcsrw3453228.jpg",intro:"之所以会有“中等收入陷阱”一说，最根本的原因在于人们的收入往往只能徘徊在中等水平却无法跨越，倘若能够突破收入瓶颈，成功跻身高收入行列，那一切压力也就不再是压力。",source:"苏宁金融研究院",authorID:"3819351799",cTime:1517445557,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8085491.d.html",id:"fyreyvz8085491",title:"新美大和滴滴，争的是一张千亿美元俱乐部门票",pic:"https://n.sinaimg.cn/tech/transform/w710h410/20180201/zxd4-fyrcsrw3411861.jpg",intro:"能否正确的认识扩张的意义及其边界，能否构建起自己的基本价值业务、并基于它获得主导性的用户入口地位，是拿到千亿美元市值俱乐部门票的关键。",source:"尹生",authorID:"1401101980",cTime:1517444621,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/53831e9cjw1e8qgp5bmzyj2050050aa8.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7981810.d.html",id:"fyqyuhy7981810",title:"为什么是秋叶原成为了'秋叶原' 而不是其他区域？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/UnMx-fyrcsrw1649090.jpg",intro:"秋叶原，一个正经的电器街，慢慢成长为了“妖艳贱货”般的宅圈。这背后究竟是道德的沦丧还是人性的扭曲呢？",source:"三文娱",authorID:"5893582170",cTime:1517388416,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.494.494.50/006qQRWWjw8f313a18xzqj30dq0dq3yt.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7966585.d.html",id:"fyqyuhy7966585",title:"艾诚专访盛希泰：如何从投行少帅到创投泰哥？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/22ff-fyrcsrw1433083.jpg",intro:"一个洪哥，一个泰哥，洪泰帮就此而生。",source:"艾诚",authorID:"1650493074",cTime:1517385221,sourcepic:"https://www.sinaimg.cn/cj/zl/management/idx/2014/0714/U10563P31T879D614F27039DT20140714104858.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrw1188298.d.html",id:"fyrcsrw1188298",title:"“BAT”之后，互联网创业现在也要站“TMD”的队了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/t_fw-fyrcsrw1187258.jpg",intro:"左右创业者命运的，除了BAT，现在TMD的影响似乎也正越来越重。",source:"歪道道",authorID:"2152848143",cTime:1517382486,sourcepic:"https://z0.sinaimg.cn/auto/resize?img=http://tvax4.sinaimg.cn/crop.0.25.1242.1242.50/8051db0fly8fne8gkcsjyj20yi0zxwl2.jpg&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrw1108827.d.html",id:"fyrcsrw1108827",title:"一文读懂印度互联网教育市场：存在4大结构性投资机会",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/oGEy-fyrcsrw1062837.jpg",intro:"从互联网教育背后的传统系统和非系统教育入手，探索中印教育行业各细分市场的发展现状与竞争格局，呈现印度互联网教育产业的整体发展图景，结合对比中印头部公司市值探讨印度互联网教育的投资价值与潜在投资标的。",source:"竺道",authorID:"6115605858",cTime:1517381716,sourcepic:"https://tva4.sinaimg.cn/crop.0.18.556.556.50/006FSssajw8fbw25j20o1j30go0gojrv.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9829123.d.html",id:"fyrcsrv9829123",title:"在CDN市场，腾讯、阿里与网宿终将“握手言和”",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/x7EU-fyrcsrv9826487.jpg",intro:"不逐利的资本不是好资本，不势利的券商不是好券商。",source:"波波夫",authorID:"1642254797",cTime:1517365795,sourcepic:"https://www.sinaimg.cn/zhuanlan/author/bobofu/idx/2016/1228/U12164P1493T24D2220F364DT20161228131250.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9623039.d.html",id:"fyrcsrv9623039",title:"迄今最全网络效应模型研究，一文看清顶级公司边界",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/vkEZ-fyrcsrv9620748.jpg",intro:"在互联网世界，连接是酶。因为连接产生聚集、产生规模、产生网络效应。",source:"红杉汇内参",authorID:"6013890910",cTime:1517363639,sourcepic:"https://z0.sinaimg.cn/auto/resize?img=http://tvax3.sinaimg.cn/default/images/default_avatar_female_50.gif&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7853977.d.html",id:"fyqyuhy7853977",title:"因为暴雪删了术士的生命虹吸，19岁少年创立了以太坊",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/jiYE-fyrcsrv9548751.jpg",intro:"今天是以太坊创始人维塔利克·布特林的24岁生日，转发此文章到朋友圈，你的微信钱包就会多出1枚价值7000多人民币的以太币。我已经试过了，是骗人的。",source:"游研社",authorID:"2634877355",cTime:1517362787,sourcepic:"https://tva4.sinaimg.cn/crop.112.0.266.266.50/9d0d09abjw8f48r8h0plhj20dw0dwgmg.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9411757.d.html",id:"fyrcsrv9411757",title:"王健林的“好人缘”与腾讯的“收税权”",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/9SqW-fyrcsrv9410979.jpg",intro:"腾讯行的是收税之实，名义上却是个社交和游戏企业，所谓社交和游戏，是用来掩盖其收税的本质。",source:"悦涛",authorID:"1437874361",cTime:1517360134,sourcepic:"https://tva2.sinaimg.cn/crop.0.0.200.200.50/55b438b9jw8ezitkkacgvj205k05kmxh.jpg"}];/* harmony default export */ var message = (defaultData);
 // CONCATENATED MODULE: ./node_modules/@mfelibs/base-utils/src/zepto.js
 var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};/*! Zepto 1.2.0
  * generated by @sina-mfe
@@ -932,16 +822,128 @@ var erudaUrl='//mjs.sinaimg.cn/wap/online/others/eruda/eruda.min.js';var mdebugU
 function src_init(){// 挂载全局命名空间，暴露 Circle.ready 函数与事件模块，
 // SINA_NEWS.event 模块阉割 showEvents 方法
 window.SINA_NEWS=window.SINA_NEWS||{ready:circle.ready,event:event_event};extra.load();}src_init();
+// CONCATENATED MODULE: ./src/view/top10/tools.js
+var tools__createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function tools__classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var tools_statusTools=function(){function statusTools(){tools__classCallCheck(this,statusTools);this.wrapper=null;this.allItems={};this.init();}tools__createClass(statusTools,[{key:'init',value:function init(){var wrapper=zepto('#j_status_tools');if(!wrapper.length){this.wrapper=zepto('<div id="j_status_tools" style="position:absolute; top:0; right:0; max-height:200px;height:50px; width:200px; background:rgba(45, 67, 72, 0.8);padding: 0 5px;;"></div>');zepto(document.body).append(this.wrapper);}else{this.wrapper=wrapper;}}},{key:'addItem',value:function addItem(id,msg){var selector='j_status_p___'+id;if(!zepto('#'+selector).length){var item=zepto('<p id="j_status_p___'+id+'" style="color:#0cd8d4;font-size: 13px;">'+id+': <span class="j_'+id+'"></span></p>');this.wrapper.append(item);this.allItems.id=item;if(msg!=null){this.allItems.id.find('.j_'+id).text(msg);}}else{this.updateItem(id,msg);}}},{key:'updateItem',value:function updateItem(id,msg){if(this.allItems.id&&msg){this.allItems.id.find('.j_'+id).text(msg);}}}]);return statusTools;}();/* harmony default export */ var tools = (tools_statusTools);
+// CONCATENATED MODULE: ./src/view/top10/infinite-scroll.js
+/**
+ * 测试方法
+ */var statusPanel=new tools();/**
+ * 测试方法
+ */// Number of items to instantiate beyond current view in the scroll direction.
+var RUNWAY_ITEMS=10;// Number of items to instantiate beyond current view in the opposite direction.
+var RUNWAY_ITEMS_OPPOSITE=10;// The number of pixels of additional length to allow scrolling to.
+var SCROLL_RUNWAY=2000;// The animation interval (in ms) for fading in content from tombstones.
+var ANIMATION_DURATION_MS=200;var InfiniteScrollerSource=function InfiniteScrollerSource(){};InfiniteScrollerSource.prototype={/**
+   * Fetch more items from the data source. This should try to fetch at least
+   * count items but may fetch more as desired. Subsequent calls to fetch should
+   * fetch items following the last successful fetch.
+   * @param {number} count The minimum number of items to fetch for display.
+   * @return {Promise(Array<Object>)} Returns a promise which will be resolved
+   *     with an array of items.
+   */fetch:function fetch(count){},/**
+   * Create a tombstone element. All tombstone elements should be identical
+   * @return {Element} A tombstone element to be displayed when item data is not
+   *     yet available for the scrolled position.
+   */createTombstone:function createTombstone(){},/**
+   * Render an item, re-using the provided item div if passed in.
+   * @param {Object} item The item description from the array returned by fetch.
+   * @param {?Element} element If provided, this is a previously displayed
+   *     element which should be recycled for the new item to display.
+   * @return {Element} The constructed element to be displayed in the scroller.
+   */render:function render(item,div){}};/**
+ * Construct an infinite scroller.
+ * @param {Element} scroller The scrollable element to use as the infinite
+ *     scroll region.
+ * @param {InfiniteScrollerSource} source A provider of the content to be
+ *     displayed in the infinite scroll region.
+ */var InfiniteScroller=function InfiniteScroller(scroller,source){this.anchorItem={index:0,offset:0};this.firstAttachedItem_=0;this.lastAttachedItem_=0;this.anchorScrollTop=0;this.tombstoneSize_=0;this.tombstoneWidth_=0;this.tombstones_=[];this.scroller_=scroller;this.source_=source;this.items_=[];this.loadedItems_=0;this.requestInProgress_=false;this.scroller_.addEventListener('scroll',this.onScroll_.bind(this));window.addEventListener('resize',this.onResize_.bind(this));// Create an element to force the scroller to allow scrolling to a certain
+// point.
+this.scrollRunway_=document.createElement('div');// Internet explorer seems to require some text in this div in order to
+// ensure that it can be scrolled to.
+this.scrollRunway_.textContent=' ';this.scrollRunwayEnd_=0;this.scrollRunway_.style.position='absolute';this.scrollRunway_.style.height='1px';this.scrollRunway_.style.width='1px';this.scrollRunway_.style.transition='transform 0.2s';this.scroller_.appendChild(this.scrollRunway_);this.onResize_();};InfiniteScroller.prototype={/**
+   * Called when the browser window resizes to adapt to new scroller bounds and
+   * layout sizes of items within the scroller.
+   */onResize_:function onResize_(){// TODO: If we already have tombstones attached to the document, it would
+// probably be more efficient to use one of them rather than create a new
+// one to measure.
+var tombstone=this.source_.createTombstone();tombstone.style.position='absolute';this.scroller_.appendChild(tombstone);tombstone.classList.remove('invisible');this.tombstoneSize_=tombstone.offsetHeight;this.tombstoneWidth_=tombstone.offsetWidth;this.scroller_.removeChild(tombstone);// Reset the cached size of items in the scroller as they may no longer be
+// correct after the item content undergoes layout.
+for(var i=0;i<this.items_.length;i++){this.items_[i].height=this.items_[i].width=0;}this.onScroll_();},/**
+   * Called when the scroller scrolls. This determines the newly anchored item
+   * and offset and then updates the visible elements, requesting more items
+   * from the source if we've scrolled past the end of the currently available
+   * content.
+   */onScroll_:function onScroll_(){var delta=this.scroller_.scrollTop-this.anchorScrollTop;// Special case, if we get to very top, always scroll to top.
+if(this.scroller_.scrollTop==0){this.anchorItem={index:0,offset:0};}else{this.anchorItem=this.calculateAnchoredItem(this.anchorItem,delta);}this.anchorScrollTop=this.scroller_.scrollTop;var lastScreenItem=this.calculateAnchoredItem(this.anchorItem,this.scroller_.offsetHeight);// console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
+statusPanel.addItem('First_of_this_page',this.anchorItem.index);this.showCB(this.anchorItem.index,lastScreenItem.index);if(delta<0)// 向上滚动 ⬆︎
+this.fill(this.anchorItem.index-RUNWAY_ITEMS,lastScreenItem.index+RUNWAY_ITEMS_OPPOSITE);else// 初始化 或者向下滚动(向底部) ⬇︎
+this.fill(this.anchorItem.index-RUNWAY_ITEMS_OPPOSITE,lastScreenItem.index+RUNWAY_ITEMS);},/**
+   * Calculates the item that should be anchored after scrolling by delta from
+   * the initial anchored item.
+   * @param {{index: number, offset: number}} initialAnchor The initial position
+   *     to scroll from before calculating the new anchor position.
+   * @param {number} delta The offset from the initial item to scroll by.
+   * @return {{index: number, offset: number}} Returns the new item and offset
+   *     scroll should be anchored to.
+   */calculateAnchoredItem:function calculateAnchoredItem(initialAnchor,delta){if(delta==0)return initialAnchor;delta+=initialAnchor.offset;var i=initialAnchor.index;var tombstones=0;if(delta<0){while(delta<0&&i>0&&this.items_[i-1].height){delta+=this.items_[i-1].height;i--;}tombstones=Math.max(-i,Math.ceil(Math.min(delta,0)/this.tombstoneSize_));}else{while(delta>0&&i<this.items_.length&&this.items_[i].height&&this.items_[i].height<delta){delta-=this.items_[i].height;i++;}if(i>=this.items_.length||!this.items_[i].height)tombstones=Math.floor(Math.max(delta,0)/this.tombstoneSize_);}i+=tombstones;delta-=tombstones*this.tombstoneSize_;return{index:i,offset:delta};},/**
+   * Sets the range of items which should be attached and attaches those items.
+   * @param {number} start The first item which should be attached.
+   * @param {number} end One past the last item which should be attached.
+   */fill:function fill(start,end){this.firstAttachedItem_=Math.max(0,start);this.lastAttachedItem_=end;this.attachContent();},/**
+   * 可视后回调
+   */showCB:function showCB(start,end){for(var i=start;i<end;i++){if(this.items_[i]&&this.items_[i].data){if(typeof this.items_[i].data.fn==='function'&&!this.items_[i].data.isFnTriggered){this.items_[i].data.fn();this.items_[i].data.isFnTriggered=1;}}}},/**
+   * Creates or returns an existing tombstone ready to be reused.
+   * @return {Element} A tombstone element ready to be used.
+   */getTombstone:function getTombstone(){var tombstone=this.tombstones_.pop();if(tombstone){tombstone.classList.remove('invisible');tombstone.style.opacity=1;tombstone.style.transform='';tombstone.style.transition='';return tombstone;}return this.source_.createTombstone();},/**
+   * Attaches content to the scroller and updates the scroll position if
+   * necessary.
+   */attachContent:function attachContent(){// Collect nodes which will no longer be rendered for reuse.
+// TODO: Limit this based on the change in visible items rather than looping
+// over all items.
+var i;var unusedNodes=[];// console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
+for(i=0;i<this.items_.length;i++){// Skip the items which should be visible.
+if(i==this.firstAttachedItem_){i=this.lastAttachedItem_-1;continue;}if(this.items_[i].node){if(this.items_[i].node.classList.contains('tombstone')){// console.log('tombstone',i,this.items_[i].node);
+this.tombstones_.push(this.items_[i].node);this.tombstones_[this.tombstones_.length-1].classList.add('invisible');}else{unusedNodes.push(this.items_[i].node);}}this.items_[i].node=null;}var tombstoneAnimations={};// Create DOM nodes.
+for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){while(this.items_.length<=i){this.addItem_();}if(this.items_[i].node){// if it's a tombstone but we have data, replace it.
+if(this.items_[i].node.classList.contains('tombstone')&&this.items_[i].data){// TODO: Probably best to move items on top of tombstones and fade them in instead.
+if(ANIMATION_DURATION_MS){this.items_[i].node.style.zIndex=1;tombstoneAnimations[i]=[this.items_[i].node,this.items_[i].top-this.anchorScrollTop];}else{this.items_[i].node.classList.add('invisible');this.tombstones_.push(this.items_[i].node);}this.items_[i].node=null;}else{continue;}}var node=this.items_[i].data?this.source_.render(this.items_[i].data,unusedNodes.pop()):this.getTombstone();// Maybe don't do this if it's already attached?
+node.style.position='absolute';this.items_[i].top=-1;this.scroller_.appendChild(node);this.items_[i].node=node;}// debugger
+// Remove all unused nodes
+while(unusedNodes.length){this.scroller_.removeChild(unusedNodes.pop());}// Get the height of all nodes which haven't been measured yet.
+for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){// Only cache the height if we have the real contents, not a placeholder.
+if(this.items_[i].data&&!this.items_[i].height){this.items_[i].height=this.items_[i].node.offsetHeight;this.items_[i].width=this.items_[i].node.offsetWidth;}}// Fix scroll position in case we have realized the heights of elements
+// that we didn't used to know.
+// TODO: We should only need to do this when a height of an item becomes
+// known above.
+this.anchorScrollTop=0;for(i=0;i<this.anchorItem.index;i++){this.anchorScrollTop+=this.items_[i].height||this.tombstoneSize_;}this.anchorScrollTop+=this.anchorItem.offset;// Position all nodes.
+var curPos=this.anchorScrollTop-this.anchorItem.offset;i=this.anchorItem.index;while(i>this.firstAttachedItem_){curPos-=this.items_[i-1].height||this.tombstoneSize_;i--;}while(i<this.firstAttachedItem_){curPos+=this.items_[i].height||this.tombstoneSize_;i++;}// Set up initial positions for animations.
+for(var i in tombstoneAnimations){var anim=tombstoneAnimations[i];this.items_[i].node.style.transform='translateY('+(this.anchorScrollTop+anim[1])+'px) scale('+this.tombstoneWidth_/this.items_[i].width+', '+this.tombstoneSize_/this.items_[i].height+')';// Call offsetTop on the nodes to be animated to force them to apply current transforms.
+this.items_[i].node.offsetTop;anim[0].offsetTop;this.items_[i].node.style.transition='transform '+ANIMATION_DURATION_MS+'ms';}for(i=this.firstAttachedItem_;i<this.lastAttachedItem_;i++){var anim=tombstoneAnimations[i];if(anim){anim[0].style.transition='transform '+ANIMATION_DURATION_MS+'ms, opacity '+ANIMATION_DURATION_MS+'ms';anim[0].style.transform='translateY('+curPos+'px) scale('+this.items_[i].width/this.tombstoneWidth_+', '+this.items_[i].height/this.tombstoneSize_+')';anim[0].style.opacity=0;}if(curPos!=this.items_[i].top){if(!anim)this.items_[i].node.style.transition='';this.items_[i].node.style.transform='translateY('+curPos+'px)';}this.items_[i].top=curPos;curPos+=this.items_[i].height||this.tombstoneSize_;}this.scrollRunwayEnd_=Math.max(this.scrollRunwayEnd_,curPos+SCROLL_RUNWAY);this.scrollRunway_.style.transform='translate(0, '+this.scrollRunwayEnd_+'px)';this.scroller_.scrollTop=this.anchorScrollTop;if(ANIMATION_DURATION_MS){// TODO: Should probably use transition end, but there are a lot of animations we could be listening to.
+setTimeout(function(){for(var i in tombstoneAnimations){var anim=tombstoneAnimations[i];anim[0].classList.add('invisible');this.tombstones_.push(anim[0]);// Tombstone can be recycled now.
+}}.bind(this),ANIMATION_DURATION_MS);}this.maybeRequestContent();},/**
+   * Requests additional content if we don't have enough currently.
+   */maybeRequestContent:function maybeRequestContent(){// Don't issue another request if one is already in progress as we don't
+// know where to start the next request yet.
+if(this.requestInProgress_)return;var itemsNeeded=this.lastAttachedItem_-this.loadedItems_;if(itemsNeeded<=0)return;this.requestInProgress_=true;this.source_.fetch(itemsNeeded).then(this.addContent.bind(this));},/**
+   * Adds an item to the items list.
+   */addItem_:function addItem_(){this.items_.push({'data':null,'node':null,'height':0,'width':0,'top':0});},/**
+   * Adds the given array of items to the items list and then calls
+   * attachContent to update the displayed content.
+   * @param {Array<Object>} items The array of items to be added to the infinite
+   *     scroller list.
+   */addContent:function addContent(items){this.requestInProgress_=false;for(var i=0;i<items.length;i++){if(this.items_.length<=this.loadedItems_)this.addItem_();this.items_[this.loadedItems_++].data=items[i];}this.attachContent();}};/* harmony default export */ var infinite_scroll = (InfiniteScroller);
+// EXTERNAL MODULE: ./src/css/index.css
+var css = __webpack_require__(5);
+var css_default = /*#__PURE__*/__webpack_require__.n(css);
+
+// CONCATENATED MODULE: ./src/view/top10/message.js
+var defaultData=[{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5580875.d.html",id:"fyrcsrw5580875",title:"吴恩达：天下武功唯快不破，我的成功可以复制",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/pCXT-fyrcsrw5578386.jpg",intro:"去年夏天就被曝光的AI Fund，吴恩达愣是憋到如今才开口承认。",source:"量子位",authorID:"6105753431",cTime:1517472692,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.200.200.50/006Fd7o3jw8fbw134ijknj305k05k3ye.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8220508.d.html",id:"fyreyvz8220508",title:"看不懂《恋与制作人》，是因为你没有少女心",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/RZu6-fyrcsrw5543327.jpg",intro:"少女心不是无知、幼稚、傻白甜，而是尝遍了世间冷暖，仍然愿意去相信一个美丽的梦境。",source:"触乐网",authorID:"3957040489",cTime:1517472260,sourcepic:"https://tva1.sinaimg.cn/crop.0.0.299.299.50/ebdba569jw1et5xb12eydj208c08c74n.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5504586.d.html",id:"fyrcsrw5504586",title:"砍单近半，iPhoneX为何开始不受欢迎了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/kw78-fyrcsrw5503259.jpg",intro:"从今天的智能手机市场来看，过去一年智能手机首次呈现负增长，但这并不是最坏的时刻。",source:"王新喜",authorID:"1888089111",cTime:1517471716,sourcepic:"https://tva2.sinaimg.cn/crop.53.0.586.586.50/7089f417jw8fbmicm71pmj20hs0hswex.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8199090.d.html",id:"fyreyvz8199090",title:"百头大战背后的信息流江湖",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/wEyE-fyrcsrw5259061.jpg",intro:"一个标题+三幅图片+精准内容，足够将碎片化的时间偷走。",source:"刘兴亮",authorID:"1455643221",cTime:1517468755,sourcepic:"https://z4.sinaimg.cn/auto/resize?img=http://tvax1.sinaimg.cn/crop.0.0.996.996.50/56c35a55ly8ffc5ly69j5j20ro0rowg1.jpg&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw5176159.d.html",id:"fyrcsrw5176159",title:"程浩:互联网下半场三大关键词",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/uSka-fyrcsrw5164585.jpg",intro:"我认为人口和流量红利消失，是中国互联网上半场跟下半场的分水岭。",source:"程浩",authorID:"5676714248",cTime:1517467837,sourcepic:"https://tva3.sinaimg.cn/crop.73.5.1888.1888.50/006caUHejw8evlryuun8kj31kw1ii7wh.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8190245.d.html",id:"fyreyvz8190245",title:"SNH48前成员亲述：站队、抑郁、撕逼 因陪酒饭局退团",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/57yN-fyrcsrw5106599.jpg",intro:"她面向窗台，背对着我，我轻轻按下拍摄键。只是不知道，此刻她看到的远方，是否还残存着曾经耀眼的梦想。",source:"娱乐资本论",authorID:"5159017394",cTime:1517467117,sourcepic:"https://www.sinaimg.cn/dy/zl/author/yulezibenlun/idx/2014/0611/U6161P1T935D150F24102DT20140611091132.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw4135418.d.html",id:"fyrcsrw4135418",title:"我为什么不看好众筹民宿",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/c6fY-fyrcsrw4133271.jpg",intro:"单从投资角度看，普通投资者投资民宿众筹项目，最看重的因素是——较高的收益率。而民宿项目收益率吸引潜在投资者的原因一般有两个：真实、旅游行业景气度。",source:"苏宁金融研究院",authorID:"3819351799",cTime:1517454570,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8117622.d.html",id:"fyreyvz8117622",title:"#创事记年度作者#榜单公布",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/LvkS-fyrcsrw3861644.jpg",intro:"新闻事件如同水面上的浮冰，伴随着时间的流逝，轰然向前。但我们相信，记录与评论的意义不会随着事件的平息而消逝。",source:"创事记",authorID:"2907917243",cTime:1517451938,sourcepic:"https://z4.sinaimg.cn/auto/resize?img=http://tvax1.sinaimg.cn/crop.17.0.345.345.50/ad534bbbly1fhicpq3no8g20ak09lt9o.gif&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8108476.d.html",id:"fyreyvz8108476",title:"古天乐的“贪玩”直播，最后变成了300万人暗中观察",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/rkQY-fyrcsrw3749951.jpg",intro:"然而，这场直播却在观众的一片骂声中结束。",source:"ACGx",authorID:"5705024508",cTime:1517450344,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.500.500.50/006e5Hukjw8eyde3ekpbvj30dw0dwmx7.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8090253.d.html",id:"fyreyvz8090253",title:"无人驾驶挺火，隔壁的机器蛇怎么样了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/EQUS-fyrcsrw3479059.jpg",intro:"说不定某一天，我们会在街上随处可见机器蛇来完成各种工作。到那时候，不知道怕蛇的孩子们会有什么感想……",source:"脑极体",authorID:"6336727143",cTime:1517446082,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyrcsrw3454014.d.html",id:"fyrcsrw3454014",title:"有多少中产已经陷入“中等收入陷阱”？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180201/Zgxv-fyrcsrw3453228.jpg",intro:"之所以会有“中等收入陷阱”一说，最根本的原因在于人们的收入往往只能徘徊在中等水平却无法跨越，倘若能够突破收入瓶颈，成功跻身高收入行列，那一切压力也就不再是压力。",source:"苏宁金融研究院",authorID:"3819351799",cTime:1517445557,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/e3a6aef7jw8e934bjx75lj20500500so.jpg"},{URL:"https://tech.sina.cn/csj/2018-02-01/doc-ifyreyvz8085491.d.html",id:"fyreyvz8085491",title:"新美大和滴滴，争的是一张千亿美元俱乐部门票",pic:"https://n.sinaimg.cn/tech/transform/w710h410/20180201/zxd4-fyrcsrw3411861.jpg",intro:"能否正确的认识扩张的意义及其边界，能否构建起自己的基本价值业务、并基于它获得主导性的用户入口地位，是拿到千亿美元市值俱乐部门票的关键。",source:"尹生",authorID:"1401101980",cTime:1517444621,sourcepic:"https://tva4.sinaimg.cn/crop.0.0.180.180.50/53831e9cjw1e8qgp5bmzyj2050050aa8.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7981810.d.html",id:"fyqyuhy7981810",title:"为什么是秋叶原成为了'秋叶原' 而不是其他区域？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/UnMx-fyrcsrw1649090.jpg",intro:"秋叶原，一个正经的电器街，慢慢成长为了“妖艳贱货”般的宅圈。这背后究竟是道德的沦丧还是人性的扭曲呢？",source:"三文娱",authorID:"5893582170",cTime:1517388416,sourcepic:"https://tva3.sinaimg.cn/crop.0.0.494.494.50/006qQRWWjw8f313a18xzqj30dq0dq3yt.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7966585.d.html",id:"fyqyuhy7966585",title:"艾诚专访盛希泰：如何从投行少帅到创投泰哥？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/22ff-fyrcsrw1433083.jpg",intro:"一个洪哥，一个泰哥，洪泰帮就此而生。",source:"艾诚",authorID:"1650493074",cTime:1517385221,sourcepic:"https://www.sinaimg.cn/cj/zl/management/idx/2014/0714/U10563P31T879D614F27039DT20140714104858.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrw1188298.d.html",id:"fyrcsrw1188298",title:"“BAT”之后，互联网创业现在也要站“TMD”的队了？",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/t_fw-fyrcsrw1187258.jpg",intro:"左右创业者命运的，除了BAT，现在TMD的影响似乎也正越来越重。",source:"歪道道",authorID:"2152848143",cTime:1517382486,sourcepic:"https://z0.sinaimg.cn/auto/resize?img=http://tvax4.sinaimg.cn/crop.0.25.1242.1242.50/8051db0fly8fne8gkcsjyj20yi0zxwl2.jpg&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrw1108827.d.html",id:"fyrcsrw1108827",title:"一文读懂印度互联网教育市场：存在4大结构性投资机会",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/oGEy-fyrcsrw1062837.jpg",intro:"从互联网教育背后的传统系统和非系统教育入手，探索中印教育行业各细分市场的发展现状与竞争格局，呈现印度互联网教育产业的整体发展图景，结合对比中印头部公司市值探讨印度互联网教育的投资价值与潜在投资标的。",source:"竺道",authorID:"6115605858",cTime:1517381716,sourcepic:"https://tva4.sinaimg.cn/crop.0.18.556.556.50/006FSssajw8fbw25j20o1j30go0gojrv.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9829123.d.html",id:"fyrcsrv9829123",title:"在CDN市场，腾讯、阿里与网宿终将“握手言和”",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/x7EU-fyrcsrv9826487.jpg",intro:"不逐利的资本不是好资本，不势利的券商不是好券商。",source:"波波夫",authorID:"1642254797",cTime:1517365795,sourcepic:"https://www.sinaimg.cn/zhuanlan/author/bobofu/idx/2016/1228/U12164P1493T24D2220F364DT20161228131250.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9623039.d.html",id:"fyrcsrv9623039",title:"迄今最全网络效应模型研究，一文看清顶级公司边界",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/vkEZ-fyrcsrv9620748.jpg",intro:"在互联网世界，连接是酶。因为连接产生聚集、产生规模、产生网络效应。",source:"红杉汇内参",authorID:"6013890910",cTime:1517363639,sourcepic:"https://z0.sinaimg.cn/auto/resize?img=http://tvax3.sinaimg.cn/default/images/default_avatar_female_50.gif&size=328_218"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyqyuhy7853977.d.html",id:"fyqyuhy7853977",title:"因为暴雪删了术士的生命虹吸，19岁少年创立了以太坊",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/jiYE-fyrcsrv9548751.jpg",intro:"今天是以太坊创始人维塔利克·布特林的24岁生日，转发此文章到朋友圈，你的微信钱包就会多出1枚价值7000多人民币的以太币。我已经试过了，是骗人的。",source:"游研社",authorID:"2634877355",cTime:1517362787,sourcepic:"https://tva4.sinaimg.cn/crop.112.0.266.266.50/9d0d09abjw8f48r8h0plhj20dw0dwgmg.jpg"},{URL:"https://tech.sina.cn/csj/2018-01-31/doc-ifyrcsrv9411757.d.html",id:"fyrcsrv9411757",title:"王健林的“好人缘”与腾讯的“收税权”",pic:"https://n.sinaimg.cn/tech/transform/w710h310/20180131/9SqW-fyrcsrv9410979.jpg",intro:"腾讯行的是收税之实，名义上却是个社交和游戏企业，所谓社交和游戏，是用来掩盖其收税的本质。",source:"悦涛",authorID:"1437874361",cTime:1517360134,sourcepic:"https://tva2.sinaimg.cn/crop.0.0.200.200.50/55b438b9jw8ezitkkacgvj205k05kmxh.jpg"}];/* harmony default export */ var message = (defaultData);
 // EXTERNAL MODULE: ./src/view/top10/stats.min.js
 var stats_min = __webpack_require__(6);
 var stats_min_default = /*#__PURE__*/__webpack_require__.n(stats_min);
 
 // CONCATENATED MODULE: ./src/view/top10/index.js
-var INIT_TIME=new Date().getTime();var page=1;/**
- * Constructs a random item with a given id.
- * @param {number} id An identifier for the item.
- * @return {Object} A randomly generated item.
- */function getItem(id){function pickRandom(a){return a[Math.floor(Math.random()*a.length)];}return new Promise(function(resolve){var item={id:id,avatar:Math.floor(Math.random()*NUM_AVATARS),self:Math.random()<0.1,image:Math.random()<1.0/20?Math.floor(Math.random()*NUM_IMAGES):'',time:new Date(Math.floor(INIT_TIME+id*20*1000+Math.random()*20*1000)),message:pickRandom(MESSAGES)};if(item.image==''){resolve(item);}else{var image=new Image();image.src='images/image'+item.image+'.jpg';image.addEventListener('load',function(){item.image=image;resolve(item);});image.addEventListener('error',function(){item.image='';resolve(item);});}});}function ContentSource(){// Collect template nodes to be cloned when needed.
+var top10_statusPanel=new tools();var totalNum=0;var INIT_TIME=new Date().getTime();var page=1;function ContentSource(){// Collect template nodes to be cloned when needed.
 //   this.tombstone_ = document.querySelector(".j_tombstone");
 //   this.messageTemplate_ = document.querySelector(".j_template");
 this.tombstone_=document.querySelector(".j_template");//   this.tombstone_ = document.querySelector("#templates > .chat-item.tombstone");
@@ -955,7 +957,7 @@ count=Math.max(30,count);return new Promise(function(resolve,reject){// Assume 5
 //   }
 //   resolve(Promise.all(items));
 // }.bind(this), 1000 /* Simulated 1 second round trip time */ );
-zepto.ajax({url:'https://interface.sina.cn/tech/simple_column.d.json?native=0&col=51901',data:{'page':page,'size':20},dataType:'jsonp',success:function success(data,status){if(data.length==0){console.log(0);var localFakeData=JSON.parse(JSON.stringify(message));localFakeData.forEach(function(item){item.id=item.id+(new Date()-0);item.title=parseInt(Math.random()*10)+', '+item.title;});data=localFakeData;}page=page+1;data.forEach(function(item){item.fn=function(){console.log(item.id);};});resolve(data);}});}.bind(this));},createTombstone:function createTombstone(){return this.tombstone_.cloneNode(true);},render:function render(item,div){// TODO: Different style?
+zepto.ajax({url:'https://interface.sina.cn/tech/simple_column.d.json?native=0&col=51901',data:{'page':page,'size':20},dataType:'jsonp',success:function success(data,status){if(data.length==0){console.log(0);var localFakeData=JSON.parse(JSON.stringify(message));localFakeData.forEach(function(item){item.id=item.id+(new Date()-0);item.title=parseInt(Math.random()*10)+', '+item.title;});data=localFakeData;}page=page+1;data.forEach(function(item){item.fn=function(){console.log(item.id);};});totalNum=totalNum+data.length;top10_statusPanel.addItem('Total_data_number',totalNum);resolve(data);}});}.bind(this));},createTombstone:function createTombstone(){return this.tombstone_.cloneNode(true);},render:function render(item,div){// TODO: Different style?
 div=div||this.messageTemplate_.cloneNode(true);div.dataset.id=item.id;item.pic&&(div.querySelector('.news_img > img').src=item.pic);item.sourcepic&&(div.querySelector('.news_author_img > img').src=item.sourcepic);div.querySelector('.news_author_name').textContent=item.source;div.querySelector('.news_h1').textContent=item.title;div.querySelector('.news_p').textContent=item.intro;// var img = div.querySelector('.bubble img');
 // if (item.image !== '') {
 //   img.classList.remove('invisible');
@@ -974,7 +976,7 @@ div=div||this.messageTemplate_.cloneNode(true);div.dataset.id=item.id;item.pic&&
 return div;}};function numDomNodes(node){if(!node.children||node.children.length==0)return 0;var childrenCount=Array.from(node.children).map(numDomNodes);return node.children.length+childrenCount.reduce(function(p,c){return p+c;},0);}document.addEventListener('DOMContentLoaded',function(){window.scroller=new infinite_scroll(document.querySelector('#chat-timeline'),new ContentSource());var stats=new stats_min_default.a();var domPanel=new stats_min_default.a.Panel('DOM Nodes','#0ff','#002');stats.addPanel(domPanel);stats.showPanel(3);zepto(domPanel.dom).show();// ios手机上不显示、临时处理
 document.body.appendChild(stats.dom);var TIMEOUT=100;setTimeout(function timeoutFunc(){// Only update DOM node graph when we have time to spare to call
 // numDomNodes(), which is a fairly expensive function.
-requestIdleCallback(function(){domPanel.update(numDomNodes(document.body),1500);setTimeout(timeoutFunc,TIMEOUT);});},TIMEOUT);});
+window.requestIdleCallback?requestIdleCallback(function(){domPanel.update(numDomNodes(document.body),1500);setTimeout(timeoutFunc,TIMEOUT);}):setInterval(function(){domPanel.update(numDomNodes(document.body),1500);},500);},TIMEOUT);});
 
 /***/ }),
 /* 5 */

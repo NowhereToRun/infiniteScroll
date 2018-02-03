@@ -1,3 +1,13 @@
+
+/**
+ * 测试方法
+ */
+import tools from './tools';
+let statusPanel = new tools();
+/**
+ * 测试方法
+ */
+
 // Number of items to instantiate beyond current view in the scroll direction.
 var RUNWAY_ITEMS = 10;
 
@@ -129,6 +139,7 @@ InfiniteScroller.prototype = {
     var lastScreenItem = this.calculateAnchoredItem(this.anchorItem, this.scroller_.offsetHeight);
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
+    statusPanel.addItem('First_of_this_page', this.anchorItem.index);
 
     if (delta < 0) // 向上滚动 ⬆︎
       this.fill(this.anchorItem.index - RUNWAY_ITEMS, lastScreenItem.index + RUNWAY_ITEMS_OPPOSITE);
