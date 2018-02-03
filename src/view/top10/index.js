@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
     stats.addPanel(domPanel);
     stats.showPanel(3);
+    $(domPanel.dom).show(); // ios手机上不显示、临时处理
     document.body.appendChild(stats.dom);
     var TIMEOUT = 100;
     setTimeout(function timeoutFunc() {

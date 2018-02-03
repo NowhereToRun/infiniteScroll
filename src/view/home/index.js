@@ -1,7 +1,7 @@
 import InfiniteScroller from './infinite-scroll2';
 import fakeData from './message';
 import '../../css/index.css';
-import Stats from './stats.min.js'
+import Stats from './stats.js'
 
 import {
   $
@@ -194,15 +194,20 @@ document.addEventListener('DOMContentLoaded', function() {
   var domPanel = new Stats.Panel('DOM Nodes', '#0ff', '#002');
   stats.addPanel(domPanel);
   stats.showPanel(3);
+  $(domPanel.dom).show(); // ios手机上不显示、临时处理
   document.body.appendChild(stats.dom);
   var TIMEOUT = 100;
   setTimeout(function timeoutFunc() {
     // Only update DOM node graph when we have time to spare to call
     // numDomNodes(), which is a fairly expensive function.
-    requestIdleCallback(function() {
-      domPanel.update(numDomNodes(document.body), 1500);
-      setTimeout(timeoutFunc, TIMEOUT);
-    });
+    window.requestIdleCallback ?
+      requestIdleCallback(function() {
+        domPanel.update(numDomNodes(document.body), 1500);
+        setTimeout(timeoutFunc, TIMEOUT);
+      }) :
+      setInterval(function() {
+        domPanel.update(numDomNodes(document.body), 1500)
+      }, 500)
   }, TIMEOUT);
 
 

@@ -1,0 +1,146 @@
+<!--
+
+Copyright 2015 Google Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="author" content="Paul Lewis" />
+  <meta name="viewport" content="width=device-width">
+  <title>Infinite Scroll</title>
+  <!-- <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'> -->
+  <link rel="stylesheet" href="https://mjs.sinaimg.cn/wap/online/cms/channel/hot-news/css/main_all.min.css">
+
+  <script>
+    ! function(w, d, m) {
+      function r() {
+        var t = 100,
+          o = 750,
+          e = d.documentElement.clientWidth || w.innerWidth,
+          n = m.max(m.min(e, 480), 320),
+          h = 50;
+        320 >= n && (h = m.floor(n / o * t * .99)), n > 320 && 362 >= n && (h = m.floor(n / o * t * 1)), n > 362 && 375 >= n && (h = m.floor(n / o * t * 1)), n > 375 && (h = m.floor(n / o * t * .97)), d.querySelector("html").style.fontSize = h + "px"
+      };
+      r();
+      w.onresize = function() {
+        r()
+      }
+    }(window, document, Math);
+  </script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    #templates {
+      display: none;
+    }
+
+    .news_list_row {
+      width: 100%;
+    }
+
+    .bgimg {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .news_img {
+      height: 0;
+      padding-top: 40%;
+      min-height: 0;
+    }
+  </style>
+  <!-- <link rel="stylesheet" href="../../css/index.css"> -->
+<link href="./static/css/top10.min.css" rel="stylesheet"></head>
+
+<body>
+  <div id="templates">
+    <!-- <a class="ls_f j_tombstone" data-id="{{id}}">
+        <b class="ls_f_b">
+            <em class="ls_f_e ls_f_e_l"></em>
+        </b>
+    </a> -->
+    <a href="" class="news_list_row j_msg" data-id="{{id}}">
+      <figure class="news_img">
+        <img class="bgimg" src="" alt="">
+        <figcaption class="news_info">
+          <blockquote class="news_author_info">
+            <span class="news_author_name"></span>
+            <span class="news_author_img">
+                <img src="" alt="">
+              </span>
+          </blockquote>
+        </figcaption>
+      </figure>
+      <aside class="news_content">
+        <h1 class="news_h1"></h1>
+        <p class="news_p"></p>
+      </aside>
+    </a>
+    <a href="" class="news_list_row tombstone j_template" data-id="{{id}}">
+      <figure class="news_img">
+        <img class="bgimg" src="" alt="">
+        <figcaption class="news_info">
+          <blockquote class="news_author_info">
+            <span class="news_author_name"></span>
+            <span class="news_author_img">
+                  <img src="" alt="">
+                </span>
+          </blockquote>
+        </figcaption>
+      </figure>
+      <aside class="news_content">
+        <h1 class="news_h1"></h1>
+        <p class="news_p"></p>
+      </aside>
+    </a>
+    <!-- <a class="j_template" href="" title="" data-id="{{id}}">
+      <section class="m_f_a">
+        <figure class="m_f_div i_bg">
+          <img class="img_width finpic" src="" alt="">
+        </figure>
+        <aside class="m_f_con">
+          <h2 class="m_f_con_t cm_tit">汪小菲偷发老婆未修照，41岁大S颜值变化大，网友：有本事别删！</h2>
+          <blockquote class="cm_f_ic cm_f_ic_l">
+            <em class="m_f_con_n m_f_con_n_r"><span class="m_f_con_ic_l m_f_con_ic icon_com"></span><span class="m_f_con_com_n">58</span></em><cite class="m_f_con_add">流凨柔软思恋</cite>
+          </blockquote>
+        </aside>
+      </section>
+    </a> -->
+  </div>
+  <ul id="chat-timeline" class="page_main" style="background:#f8f8f8">
+
+  </ul>
+  <!-- <script src="es6-promise.js"></script> -->
+  <!-- <script src="stats.min.js"></script> -->
+  <!-- <script src="scripts/infinite-scroll.js"></script> -->
+  <!-- <script src="scripts/messages.js"></script> -->
+
+<script type="text/javascript" src="./static/js/top10.min.js"></script></body>
+
+</html>
