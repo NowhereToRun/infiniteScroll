@@ -129,6 +129,7 @@ InfiniteScroller.prototype = {
     var lastScreenItem = this.calculateAnchoredItem(this.anchorItem, this.scroller_.offsetHeight);
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
+    console.log(this.anchorItem.index, lastScreenItem.index,delta);
 
     if (delta < 0) // 向上滚动 ⬆︎
       this.fill(this.anchorItem.index - RUNWAY_ITEMS, lastScreenItem.index + RUNWAY_ITEMS_OPPOSITE);

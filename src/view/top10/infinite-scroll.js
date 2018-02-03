@@ -129,7 +129,7 @@ InfiniteScroller.prototype = {
     var lastScreenItem = this.calculateAnchoredItem(this.anchorItem, this.scroller_.offsetHeight);
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
-
+    console.log(this.anchorItem.index, lastScreenItem.index,delta);
     if (delta < 0) // 向上滚动 ⬆︎
       this.fill(this.anchorItem.index - RUNWAY_ITEMS, lastScreenItem.index + RUNWAY_ITEMS_OPPOSITE);
     else // 初始化 或者向下滚动(向底部) ⬇︎
@@ -184,19 +184,19 @@ InfiniteScroller.prototype = {
     this.attachContent();
   },
 
-    /**
-     * 可视后回调
-     */
-    showCB: function(start, end) {
-      for (var i = start; i < end; i++) {
-        if (this.items_[i] && this.items_[i].data) {
-          if (typeof this.items_[i].data.fn === 'function' && !this.items_[i].data.isFnTriggered) {
-            this.items_[i].data.fn();
-            this.items_[i].data.isFnTriggered = 1;
-          }
+  /**
+   * 可视后回调
+   */
+  showCB: function(start, end) {
+    for (var i = start; i < end; i++) {
+      if (this.items_[i] && this.items_[i].data) {
+        if (typeof this.items_[i].data.fn === 'function' && !this.items_[i].data.isFnTriggered) {
+          this.items_[i].data.fn();
+          this.items_[i].data.isFnTriggered = 1;
         }
       }
-    },
+    }
+  },
 
   /**
    * Creates or returns an existing tombstone ready to be reused.
