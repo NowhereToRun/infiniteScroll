@@ -875,9 +875,11 @@ for(var i=0;i<this.items_.length;i++){this.items_[i].height=this.items_[i].width
    * content.
    */onScroll_:function onScroll_(){var delta=this.scroller_.scrollTop-this.anchorScrollTop;// Special case, if we get to very top, always scroll to top.
 if(this.scroller_.scrollTop==0){this.anchorItem={index:0,offset:0};}else{this.anchorItem=this.calculateAnchoredItem(this.anchorItem,delta);}this.anchorScrollTop=this.scroller_.scrollTop;var lastScreenItem=this.calculateAnchoredItem(this.anchorItem,this.scroller_.offsetHeight);// console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
-this.showCB(this.anchorItem.index,lastScreenItem.index);statusPanel.addItem('First_of_this_page',this.anchorItem.index);if(delta<0)// 向上滚动 ⬆︎
-this.fill(this.anchorItem.index-RUNWAY_ITEMS,lastScreenItem.index+RUNWAY_ITEMS_OPPOSITE);else// 初始化 或者向下滚动(向底部) ⬇︎
-this.fill(this.anchorItem.index-RUNWAY_ITEMS_OPPOSITE,lastScreenItem.index+RUNWAY_ITEMS);},/**
+this.showCB(this.anchorItem.index,lastScreenItem.index);statusPanel.addItem('First_of_this_page',this.anchorItem.index);if(delta<0){// 向上滚动 ⬆︎  runway代表滚动方向 当前可视区元素第20个 则需从序号 20-RUNWAY_ITEMS 处开始补充
+//  RUNWAY_ITEMS 底部不可视区补充元素 RUNWAY_ITEMS_OPPOSITE 顶部不可视区补充元素
+this.fill(this.anchorItem.index-RUNWAY_ITEMS,lastScreenItem.index+RUNWAY_ITEMS_OPPOSITE);}else{// 初始化 或者向下滚动(向底部) ⬇︎
+// RUNWAY_ITEMS_OPPOSITE 取值为10 则 0~10个元素 顶部都不需要补充元素
+this.fill(this.anchorItem.index-RUNWAY_ITEMS_OPPOSITE,lastScreenItem.index+RUNWAY_ITEMS);}},/**
    * Calculates the item that should be anchored after scrolling by delta from
    * the initial anchored item.
    * @param {{index: number, offset: number}} initialAnchor The initial position
@@ -903,7 +905,7 @@ this.fill(this.anchorItem.index-RUNWAY_ITEMS_OPPOSITE,lastScreenItem.index+RUNWA
 var i;// var unusedNodes = [];
 var unusedNodesObj={};// console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
 for(i=0;i<this.items_.length;i++){// Skip the items which should be visible.
-if(i==this.firstAttachedItem_){i=this.lasg289tAttachedItem_-1;continue;}// console.log(this.items_[i])
+if(i==this.firstAttachedItem_){i=this.lastAttachedItem_-1;continue;}// console.log(this.items_[i])
 if(this.items_[i].node){if(this.items_[i].node.classList.contains('tombstone')){// console.log('tombstone',i,this.items_[i].node);
 this.tombstones_.push(this.items_[i].node);this.tombstones_[this.tombstones_.length-1].classList.add('invisible');}else{// unusedNodes.push(this.items_[i].node);
 // add 根据模板类型回收

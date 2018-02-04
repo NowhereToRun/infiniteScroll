@@ -1,4 +1,3 @@
-
 /**
  * 测试方法
  */
@@ -140,11 +139,15 @@ InfiniteScroller.prototype = {
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
     statusPanel.addItem('First_of_this_page', this.anchorItem.index);
-
-    if (delta < 0) // 向上滚动 ⬆︎
+    if (delta < 0) {
+      // 向上滚动 ⬆︎  runway代表滚动方向 当前可视区元素第20个 则需从序号 20-RUNWAY_ITEMS 处开始补充
+      //  RUNWAY_ITEMS 底部不可视区补充元素 RUNWAY_ITEMS_OPPOSITE 顶部不可视区补充元素
       this.fill(this.anchorItem.index - RUNWAY_ITEMS, lastScreenItem.index + RUNWAY_ITEMS_OPPOSITE);
-    else // 初始化 或者向下滚动(向底部) ⬇︎
+    } else {
+      // 初始化 或者向下滚动(向底部) ⬇︎
+      // RUNWAY_ITEMS_OPPOSITE 取值为10 则 0~10个元素 顶部都不需要补充元素
       this.fill(this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
+    }
   },
 
   /**
@@ -241,7 +244,7 @@ InfiniteScroller.prototype = {
     for (i = 0; i < this.items_.length; i++) {
       // Skip the items which should be visible.
       if (i == this.firstAttachedItem_) {
-        i = this.lasg289tAttachedItem_ - 1;
+        i = this.lastAttachedItem_ - 1;
         continue;
       }
       // console.log(this.items_[i])
