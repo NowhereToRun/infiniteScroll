@@ -4,8 +4,9 @@ import fakeData from './message'
 import {
   $
 } from '@mfelibs/base-utils'
-import Stats from './stats.min.js'
-import tools from './tools'
+import tools from '../../js/tools'
+import Stats from '../../js/stats.js'
+
 var statusPanel  = new tools();
 var totalNum = 0;
 

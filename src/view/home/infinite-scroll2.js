@@ -1,7 +1,7 @@
 /**
  * 测试方法
  */
-import tools from './tools';
+import tools from '../../js/tools'
 let statusPanel = new tools();
 /**
  * 测试方法
@@ -11,7 +11,11 @@ let statusPanel = new tools();
 var RUNWAY_ITEMS = 10;
 
 // Number of items to instantiate beyond current view in the opposite direction.
-var RUNWAY_ITEMS_OPPOSITE = 10;
+// 向页面顶部滚动 ⬆︎  需补充在页面上方不可视区内的元素数量
+// 命名为滚动反方向  RUNWAY_ITEMS_OPPOSITE 
+// 可以理解为他定义的runway方向为window系统操作鼠标滑轮的滚动方向 或者拖动滚动条的方向
+// 而不是mac触摸板 或者手机屏幕手指滑动的方向
+var RUNWAY_ITEMS_OPPOSITE = 5;
 
 // The number of pixels of additional length to allow scrolling to.
 var SCROLL_RUNWAY = 2000;
@@ -62,7 +66,7 @@ let InfiniteScroller = function(scroller, source) {
     index: 0,
     offset: 0
   };
-  this.firstAttachedItem_ = 0;
+  this.firstAttachedItem_ = 0; // 可视区顶部应补充的Item编码    最小是0
   this.lastAttachedItem_ = 0;
   this.anchorScrollTop = 0;
   this.tombstoneSize_ = 0;
@@ -70,9 +74,10 @@ let InfiniteScroller = function(scroller, source) {
   this.tombstones_ = [];
   this.scroller_ = scroller;
   this.source_ = source;
-  this.items_ = [];
+  this.items_ = []; // 所有数据列表
   this.loadedItems_ = 0;
   this.requestInProgress_ = false;
+  console.log(this.scroller_);
   this.scroller_.addEventListener('scroll', this.onScroll_.bind(this));
   window.addEventListener('resize', this.onResize_.bind(this));
 
@@ -124,6 +129,7 @@ InfiniteScroller.prototype = {
    * content.
    */
   onScroll_: function() {
+    statusPanel.addItem('scroll_', Math.random());
     var delta = this.scroller_.scrollTop - this.anchorScrollTop;
     // Special case, if we get to very top, always scroll to top.
     if (this.scroller_.scrollTop == 0) {
@@ -239,18 +245,16 @@ InfiniteScroller.prototype = {
     var i;
     // var unusedNodes = [];
     var unusedNodesObj = {};
-    // console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
-
+    // console.log(this.items_.length, this.firstAttachedItem_, this.lastAttachedItem_);
     for (i = 0; i < this.items_.length; i++) {
       // Skip the items which should be visible.
       if (i == this.firstAttachedItem_) {
         i = this.lastAttachedItem_ - 1;
         continue;
       }
-      // console.log(this.items_[i])
+
       if (this.items_[i].node) {
         if (this.items_[i].node.classList.contains('tombstone')) {
-          // console.log('tombstone',i,this.items_[i].node);
           this.tombstones_.push(this.items_[i].node);
           this.tombstones_[this.tombstones_.length - 1].classList.add('invisible');
         } else {
@@ -266,18 +270,24 @@ InfiniteScroller.prototype = {
 
         }
       }
+      // 清理缓存数据里的node节点 只有可视区内 和上下预保留的 有node节点数据
+      // 此处的this.items_[]的数量可能比需展示一屏的数量少 在下面的循环里会补充
       this.items_[i].node = null;
     }
+
     var tombstoneAnimations = {};
     // Create DOM nodes.
     for (i = this.firstAttachedItem_; i < this.lastAttachedItem_; i++) {
-      while (this.items_.length <= i)
+      while (this.items_.length <= i) {
         this.addItem_();
+        console.log('addItem');
+      }
       if (this.items_[i].node) {
         // if it's a tombstone but we have data, replace it.
         if (this.items_[i].node.classList.contains('tombstone') &&
           this.items_[i].data) {
           // TODO: Probably best to move items on top of tombstones and fade them in instead.
+          // 隐藏占位墓碑元素 移动墓碑元素到可复用墓碑元素列表里
           if (ANIMATION_DURATION_MS) {
             this.items_[i].node.style.zIndex = 1;
             tombstoneAnimations[i] = [this.items_[i].node, this.items_[i].top - this.anchorScrollTop];
@@ -290,7 +300,9 @@ InfiniteScroller.prototype = {
           continue;
         }
       }
-      // var node = this.items_[i].data ? this.source_.render(this.items_[i].data, unusedNodes.pop()) : this.getTombstone();
+
+      // 当前可视区内节点为 墓碑元素 或者 this.items_[i].node 为空（没有渲染过） 执行下面的逻辑
+      // 已经渲染过的话 已从上面的判断中跳过
       var dom = null;
       var templateType = this.items_[i].data && this.items_[i].data.randomModule;
       if (unusedNodesObj[templateType] && unusedNodesObj[templateType].length) {
@@ -337,7 +349,11 @@ InfiniteScroller.prototype = {
     this.anchorScrollTop += this.anchorItem.offset;
 
     // Position all nodes.
-    var curPos = this.anchorScrollTop - this.anchorItem.offset;
+    // curPos 顶部补充元素+所有可视区元素+底部补充元素 的偏移    从第一个顶部补充元素的偏移开始
+    // 例如 拖动滚动条方向向下（触摸手势方向向上）
+    // 当前可视区第一个元素的index为10，则 curPos 为第 10-RUNWAY_ITEMS_OPPOSITE 元素的 translateY
+    var curPos = this.anchorScrollTop - this.anchorItem.offset; // 目前取的是 可视区内首个元素 距离可滑动列表顶部的距离  其实就是他的translateY
+    // console.log(this.anchorItem.index, this.firstAttachedItem_,curPos);
     i = this.anchorItem.index;
     while (i > this.firstAttachedItem_) {
       curPos -= this.items_[i - 1].height || this.tombstoneSize_;

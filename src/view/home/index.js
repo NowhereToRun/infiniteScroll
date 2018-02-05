@@ -1,12 +1,12 @@
 import InfiniteScroller from './infinite-scroll2';
 import fakeData from './message';
 import '../../css/index.css';
-import Stats from './stats.js'
+import Stats from '../../js/stats.js'
 
 import {
   $
 } from '@mfelibs/base-utils'
-import tools from './tools'
+import tools from '../../js/tools'
 var statusPanel  = new tools();
 var totalNum = 0;
 

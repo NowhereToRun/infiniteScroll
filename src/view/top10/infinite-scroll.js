@@ -1,7 +1,7 @@
 /**
  * 测试方法
  */
-import tools from './tools';
+import tools from '../../js/tools'
 let statusPanel = new tools();
 /**
  * 测试方法
@@ -236,7 +236,7 @@ InfiniteScroller.prototype = {
     var i;
     var unusedNodes = [];
     // console.log(this.firstAttachedItem_,this.lastAttachedItem_,this.items_.length);
-
+    console.log(this.items_.length, this.firstAttachedItem_, this.lastAttachedItem_);
     for (i = 0; i < this.items_.length; i++) {
       // Skip the items which should be visible.
       if (i == this.firstAttachedItem_) {
