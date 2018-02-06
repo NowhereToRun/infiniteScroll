@@ -1,27 +1,18 @@
 import InfiniteScroller from './infinite-scroll2';
 import fakeData from './message';
-import '../../css/index.css';
+import './index.css';
 import Stats from '../../js/stats.js'
-
 import {
   $
 } from '@mfelibs/base-utils'
 import tools from '../../js/tools'
-var statusPanel  = new tools();
+var statusPanel = new tools();
 var totalNum = 0;
-
-
 var INIT_TIME = new Date().getTime();
 var page = 1;
 
 function ContentSource() {
-  // Collect template nodes to be cloned when needed.
-  //   this.tombstone_ = document.querySelector(".j_tombstone");
-  //   this.messageTemplate_ = document.querySelector(".j_template");
-
   this.tombstone_ = document.querySelector(".j_tombstone");
-  //   this.tombstone_ = document.querySelector("#templates > .chat-item.tombstone");
-  //   this.messageTemplate_ = document.querySelector("#templates > .chat-item:not(.tombstone)");
   this.messageTemplate_ = document.querySelector(".j_msg");
   this.messageTemplate2_ = document.querySelector(".j_msg_2");
   this.nextItem_ = 0;
@@ -30,8 +21,7 @@ function ContentSource() {
 
 ContentSource.prototype = {
   fetch: function(count) {
-    // Fetch at least 30 or count more objects for display.
-    count = Math.max(30, count);
+    // count = Math.max(30, count);
     var self = this;
     return new Promise(function(resolve, reject) {
       if (!this.noData) {
@@ -182,6 +172,5 @@ document.addEventListener('DOMContentLoaded', function() {
         domPanel.update(numDomNodes(document.body), 1500)
       }, 500)
   }, TIMEOUT);
-
 
 });

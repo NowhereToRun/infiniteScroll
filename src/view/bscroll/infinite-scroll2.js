@@ -6,6 +6,8 @@ let statusPanel = new tools();
 /**
  * 测试方法
  */
+import BScroll from 'better-scroll'
+let scroll = new BScroll('.wrapper')
 
 // Number of items to instantiate beyond current view in the scroll direction.
 var RUNWAY_ITEMS = 10;
@@ -77,7 +79,7 @@ let InfiniteScroller = function(scroller, source) {
   this.items_ = []; // 所有数据列表
   this.loadedItems_ = 0;
   this.requestInProgress_ = false;
-  console.log(this.scroller_);
+  // console.log(this.scroller_);
   this.scroller_.addEventListener('scroll', this.onScroll_.bind(this));
   window.addEventListener('resize', this.onResize_.bind(this));
 
@@ -390,7 +392,8 @@ InfiniteScroller.prototype = {
 
     this.scrollRunwayEnd_ = Math.max(this.scrollRunwayEnd_, curPos + SCROLL_RUNWAY)
     this.scrollRunway_.style.transform = 'translate(0, ' + this.scrollRunwayEnd_ + 'px)';
-    this.scroller_.scrollTop = this.anchorScrollTop;
+    // this.scroller_.scrollTop = this.anchorScrollTop;
+    this.scroller_.style.height = this.scrollRunwayEnd_ + 'px';
 
     if (ANIMATION_DURATION_MS) {
       // TODO: Should probably use transition end, but there are a lot of animations we could be listening to.

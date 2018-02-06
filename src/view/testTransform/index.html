@@ -44,20 +44,6 @@ limitations under the License.
     }(window, document, Math);
   </script>
   <style>
-/* #chat-timeline {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: initial !important;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  box-sizing: border-box;
-  contain: layout;
-  will-change: transform;
-} */
-
     #templates {
       display: none;
     }
@@ -80,16 +66,27 @@ limitations under the License.
       padding: .22rem .2rem;
       background: rgb(248, 248, 248);
     }
-    .ls_f_b{
+
+    .ls_f_b {
       padding-left: 2.4rem;
     }
-    .ls_f_e_l{
+
+    .ls_f_e_l {
       left: 2.4rem;
     }
-    .m_video_box{
+
+    .m_video_box {
       width: 100%;
       margin: 0;
       padding: 0 .2rem .2rem
+    }
+
+    .sticky {
+      position: -webkit-sticky !important;
+      position: -moz-sticky !important;
+      position: -ms-sticky !important;
+      position: -o-sticky !important;
+      position: sticky !important;
     }
   </style>
   <!-- <link rel="stylesheet" href="../../css/index.css"> -->
@@ -120,27 +117,35 @@ limitations under the License.
       </section>
     </a>
     <a class="m_video_box show j_msg" href="JavaScript:void(0)" title="请后端同学务必填写标题" style="position:absolute;">
-        <figure class="m_video_img_box">
-          <aside class="m_video_img_bg">
-            <img class="m_video_img_bg_img" src="https://z1.sinaimg.cn/auto/resize?img=http://qncdn.miaopai.com/stream/00Im2J78YmRz~-N0DLboJ9~DeLYHH65H_1494899978.jpg&amp;size=710_400">
-          </aside>
-          <blockquote class="m_video_info "><span>935次播放</span><span class="fr">382KB</span><span class="m_video_info_line"></span>
-            <time class="fr">05:38</time>
-          </blockquote>
-          <span class="cm_btn_paly icon_s_video cm_c_c"></span>
-        </figure>
-        <h2 class="m_video_tit cm_tit">跟着《爱乐之城》寻找洛杉矶10大浪漫地标跟着《爱乐之城》寻找洛杉矶10大浪漫地标</h2>
-      </a>
+      <figure class="m_video_img_box">
+        <aside class="m_video_img_bg">
+          <img class="m_video_img_bg_img" src="https://z1.sinaimg.cn/auto/resize?img=http://qncdn.miaopai.com/stream/00Im2J78YmRz~-N0DLboJ9~DeLYHH65H_1494899978.jpg&amp;size=710_400">
+        </aside>
+        <blockquote class="m_video_info "><span>935次播放</span><span class="fr">382KB</span><span class="m_video_info_line"></span>
+          <time class="fr">05:38</time>
+        </blockquote>
+        <span class="cm_btn_paly icon_s_video cm_c_c"></span>
+      </figure>
+      <h2 class="m_video_tit cm_tit">跟着《爱乐之城》寻找洛杉矶10大浪漫地标跟着《爱乐之城》寻找洛杉矶10大浪漫地标</h2>
+    </a>
   </div>
-  <ul id="chat-timeline" class="page_main" style="background:#f8f8f8">
-
-
+  <div style="height:200px; background:#7fb86e"></div>
+  <div style="height:200px; background:#68975a"></div>
+  <div style="height:200px; background:#405c37"></div>
+  <div style="height:200px; background:#306121"></div>
+  <div style="height:200px; background:#1f4214"></div>
+  <ul id="chat-timeline" class="page_main sticky" style="background:#f8f8f8;top:20px;height:100vh;">
+    <div style="height:200px;width:100%; background:#9ee489;transform:translateY(200px);position:absolute;">
+      ooooooo
+    </div>
+    <div style="height:200px;width:100%; background:#9ee489;transform:translateY(700px);position:absolute;">
+      啊啊啊啊啊啊啊啊啊啊啊啊
+      <p>sa</p>
+      <p>sa</p>
+      <p>sa</p>
+      <p>sa</p>
+    </div>
   </ul>
-  <!-- <script src="es6-promise.js"></script> -->
-  <!-- <script src="stats.min.js"></script> -->
-  <!-- <script src="scripts/infinite-scroll.js"></script> -->
-  <!-- <script src="scripts/messages.js"></script> -->
-
 </body>
 
 </html>

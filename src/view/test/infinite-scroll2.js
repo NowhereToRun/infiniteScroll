@@ -9,7 +9,10 @@ let statusPanel = new tools();
 
 // Number of items to instantiate beyond current view in the scroll direction.
 var RUNWAY_ITEMS = 10;
-
+statusPanel.addItem('settimeout', 1);
+setTimeout(() => {
+  statusPanel.addItem('settimeout2s', Math.random());
+}, 2000);
 // Number of items to instantiate beyond current view in the opposite direction.
 // 向页面顶部滚动 ⬆︎  需补充在页面上方不可视区内的元素数量
 // 命名为滚动反方向  RUNWAY_ITEMS_OPPOSITE 
@@ -129,7 +132,7 @@ InfiniteScroller.prototype = {
    * content.
    */
   onScroll_: function() {
-    statusPanel.addItem('scroll_', Math.random());
+    // statusPanel.addItem('scroll_', Math.random());
     var delta = this.scroller_.scrollTop - this.anchorScrollTop;
     // Special case, if we get to very top, always scroll to top.
     if (this.scroller_.scrollTop == 0) {
