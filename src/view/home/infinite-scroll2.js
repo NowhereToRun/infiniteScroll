@@ -77,7 +77,6 @@ let InfiniteScroller = function(scroller, source) {
   this.items_ = []; // 所有数据列表
   this.loadedItems_ = 0;
   this.requestInProgress_ = false;
-  console.log(this.scroller_);
   this.scroller_.addEventListener('scroll', this.onScroll_.bind(this));
   window.addEventListener('resize', this.onResize_.bind(this));
 
