@@ -156,7 +156,6 @@ InfiniteScroller.prototype = {
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
     statusPanel.addItem('First_of_this_page', this.anchorItem.index);
-    console.log(this.anchorItem.index, lastScreenItem.index)
     if (delta < 0) {
       // 向上滚动 ⬆︎  runway代表滚动方向 当前可视区元素第20个 则需从序号 20-RUNWAY_ITEMS 处开始补充
       //  RUNWAY_ITEMS 底部不可视区补充元素 RUNWAY_ITEMS_OPPOSITE 顶部不可视区补充元素
