@@ -9,10 +9,6 @@ let statusPanel = new tools();
 
 // Number of items to instantiate beyond current view in the scroll direction.
 var RUNWAY_ITEMS = 10;
-statusPanel.addItem('settimeout', 1);
-setTimeout(() => {
-  statusPanel.addItem('settimeout2s', Math.random());
-}, 2000);
 // Number of items to instantiate beyond current view in the opposite direction.
 // 向页面顶部滚动 ⬆︎  需补充在页面上方不可视区内的元素数量
 // 命名为滚动反方向  RUNWAY_ITEMS_OPPOSITE 
@@ -80,8 +76,10 @@ let InfiniteScroller = function(scroller, source) {
   this.items_ = []; // 所有数据列表
   this.loadedItems_ = 0;
   this.requestInProgress_ = false;
-  console.log(this.scroller_);
   this.scroller_.addEventListener('scroll', this.onScroll_.bind(this));
+  this.scroller_.addEventListener('touchmove', function() {
+    statusPanel.addItem('scrollTop', $('#chat-timeline').get(0).scrollTop);
+  });
   window.addEventListener('resize', this.onResize_.bind(this));
 
   // Create an element to force the scroller to allow scrolling to a certain

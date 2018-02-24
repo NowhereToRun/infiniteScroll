@@ -7,21 +7,21 @@ let statusPanel = new tools();
  * 测试方法
  */
 
+// scroll direction为window系统操作鼠标滑轮的滚动方向 或者拖动滚动条的方向
+// 而不是mac触摸板 或者手机屏幕手指滑动的方向
 // Number of items to instantiate beyond current view in the scroll direction.
-var RUNWAY_ITEMS = 10;
+let RUNWAY_ITEMS = 10;
 
 // Number of items to instantiate beyond current view in the opposite direction.
-// 向页面顶部滚动 ⬆︎  需补充在页面上方不可视区内的元素数量
-// 命名为滚动反方向  RUNWAY_ITEMS_OPPOSITE 
-// 可以理解为他定义的runway方向为window系统操作鼠标滑轮的滚动方向 或者拖动滚动条的方向
-// 而不是mac触摸板 或者手机屏幕手指滑动的方向
-var RUNWAY_ITEMS_OPPOSITE = 5;
+let RUNWAY_ITEMS_OPPOSITE = 5;
 
 // The number of pixels of additional length to allow scrolling to.
-var SCROLL_RUNWAY = 2000;
+let SCROLL_RUNWAY = 2000;
 
 // The animation interval (in ms) for fading in content from tombstones.
-var ANIMATION_DURATION_MS = 200;
+let ANIMATION_DURATION_MS = 200;
+
+let tombstoneClassName = 'j_tombstone';
 
 let InfiniteScrollerSource = function() {}
 
@@ -61,13 +61,18 @@ InfiniteScrollerSource.prototype = {
  * @param {InfiniteScrollerSource} source A provider of the content to be
  *     displayed in the infinite scroll region.
  */
-let InfiniteScroller = function(scroller, source) {
+let InfiniteScroller = function(scroller, source, config) {
+  if (config) {
+    config.runwayItems != null && (RUNWAY_ITEMS = config.runwayItems);
+    config.runwayItemsOpposite != null && (RUNWAY_ITEMS_OPPOSITE = config.runwayItemsOpposite);
+    config.tombstoneClassName != null && (tombstoneClassName = config.tombstoneClassName)
+  }
   this.anchorItem = {
     index: 0,
     offset: 0
   };
-  this.firstAttachedItem_ = 0; // 可视区顶部应补充的Item编码    最小是0
-  this.lastAttachedItem_ = 0;
+  this.firstAttachedItem_ = 0; // 可视区顶部应补充的Item编码，最小为0。会根据 RUNWAY_ITEMS 与 RUNWAY_ITEMS_OPPOSITE 的值动态计算。例如向页面底部滚动 取值为 当前可视区第一个元素index-RUNWAY_ITEMS_OPPOSITE；向页面顶部滚动 取值为 当前可视区第一个元素index-RUNWAY_ITEMS
+  this.lastAttachedItem_ = 0; // 可视区底部应补充的Item编码
   this.anchorScrollTop = 0;
   this.tombstoneSize_ = 0;
   this.tombstoneWidth_ = 0;
@@ -128,7 +133,6 @@ InfiniteScroller.prototype = {
    * content.
    */
   onScroll_: function() {
-    statusPanel.addItem('scroll_', Math.random());
     var delta = this.scroller_.scrollTop - this.anchorScrollTop;
     // Special case, if we get to very top, always scroll to top.
     if (this.scroller_.scrollTop == 0) {
@@ -144,6 +148,7 @@ InfiniteScroller.prototype = {
     // console.log(this.anchorItem, lastScreenItem, this.anchorItem.index - RUNWAY_ITEMS_OPPOSITE, lastScreenItem.index + RUNWAY_ITEMS);
     this.showCB(this.anchorItem.index, lastScreenItem.index);
     statusPanel.addItem('First_of_this_page', this.anchorItem.index);
+
     if (delta < 0) {
       // 向上滚动 ⬆︎  runway代表滚动方向 当前可视区元素第20个 则需从序号 20-RUNWAY_ITEMS 处开始补充
       //  RUNWAY_ITEMS 底部不可视区补充元素 RUNWAY_ITEMS_OPPOSITE 顶部不可视区补充元素
@@ -253,7 +258,7 @@ InfiniteScroller.prototype = {
       }
 
       if (this.items_[i].node) {
-        if (this.items_[i].node.classList.contains('tombstone')) {
+        if (this.items_[i].node.classList.contains(tombstoneClassName)) {
           this.tombstones_.push(this.items_[i].node);
           this.tombstones_[this.tombstones_.length - 1].classList.add('invisible');
         } else {
@@ -283,7 +288,7 @@ InfiniteScroller.prototype = {
       }
       if (this.items_[i].node) {
         // if it's a tombstone but we have data, replace it.
-        if (this.items_[i].node.classList.contains('tombstone') &&
+        if (this.items_[i].node.classList.contains(tombstoneClassName) &&
           this.items_[i].data) {
           // TODO: Probably best to move items on top of tombstones and fade them in instead.
           // 隐藏占位墓碑元素 移动墓碑元素到可复用墓碑元素列表里

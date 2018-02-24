@@ -160,7 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
   window.scroller =
     new InfiniteScroller(
       document.querySelector('#chat-timeline'),
-      new ContentSource()
+      new ContentSource(),
+      {tombstoneClassName : 'j_tombstone'}
     );
 
   var stats = new Stats();

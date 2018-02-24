@@ -11,7 +11,7 @@ class statusTools {
   init() {
     let wrapper = $('#j_status_tools');
     if (!wrapper.length) {
-      this.wrapper = $('<div id="j_status_tools" style="position:fixed; top:0; right:0; max-height:200px;min-height:50px; width:200px; background:rgba(45, 67, 72, 0.8);padding: 0 5px;;"></div>');
+      this.wrapper = $('<div id="j_status_tools" style="position:fixed; top:0; right:0; max-height:200px;min-height:50px; width:200px; background:rgba(45, 67, 72, 0.8);padding: 0 5px;z-index: 9999;"></div>');
       $(document.body).append(this.wrapper);
     } else {
       this.wrapper = wrapper;
